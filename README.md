@@ -1,5 +1,7 @@
 # python-destilledESL
 
+[![DOI](https://zenodo.org/badge/95235014.svg)](https://zenodo.org/badge/latestdoi/95235014)
+
 This is a python port of the entirety of
 https://github.com/EconomicSL/destilledESL, further trimmed to its essence.
 `destilledESL` is a rewrite of Core-ESL, a reference implementation of Economic
