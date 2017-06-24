@@ -15,7 +15,7 @@ class Agent:
         self.mainLedger = Ledger(self)
         self.obligationsAndGoodsMailbox = ObligationsAndGoodsMailbox()
 
-    def add(self, contract):
+    def add(self, contract) -> None:
         if (contract.getAssetParty() == self):
             # This contract is an asset for me.
             self.mainLedger.addAsset(contract)
@@ -23,7 +23,7 @@ class Agent:
             # This contract is a liability for me
             self.mainLedger.addLiability(contract)
 
-    def getName(self):
+    def getName(self) -> str:
         return self.name
 
     def getTime(self):
@@ -35,7 +35,7 @@ class Agent:
     def isAlive(self):
         return self.alive
 
-    def addCash(self, amount):
+    def addCash(self, amount) -> None:
         self.mainLedger.addCash(amount)
 
     def getCash_(self):
@@ -47,14 +47,14 @@ class Agent:
     def getMainLedger(self):
         return self.mainLedger
 
-    def step(self):
+    def step(self) -> None:
         for good_message in self.obligationsAndGoodsMailbox.goods_inbox:
             self.getMainLedger().addGoods(good_message.good_name, good_message.amount, good_message.value)
         self.obligationsAndGoodsMailbox.goods_inbox.clear()
         self.obligationsAndGoodsMailbox.step()
         self.mailbox.step()
 
-    def sendObligation(self, recipient, obligation):
+    def sendObligation(self, recipient, obligation) -> None:
         if isinstance(obligation, ObligationMessage):
             recipient.receiveObligation(obligation)
             self.obligationsAndGoodsMailbox.addToObligationOutbox(obligation)
@@ -62,19 +62,19 @@ class Agent:
             msg = ObligationMessage(self, obligation)
             recipient.receiveMessage(msg)
 
-    def receiveObligation(self, obligation):
+    def receiveObligation(self, obligation) -> None:
         self.obligationsAndGoodsMailbox.receiveObligation(obligation)
 
-    def receiveMessage(self, msg):
+    def receiveMessage(self, msg) -> None:
         if isinstance(msg, ObligationMessage):
             self.obligationsAndGoodsMailbox.receiveMessage(msg)
         else:
             self.mailbox.receiveMessage(msg)
 
-    def receiveGoodMessage(self, good_message):
+    def receiveGoodMessage(self, good_message) -> None:
         self.obligationsAndGoodsMailbox.receiveGoodMessage(good_message)
 
-    def printMailbox(self):
+    def printMailbox(self) -> None:
         self.obligationsAndGoodsMailbox.printMailbox()
 
     def message(self, receiver, topic, content):
@@ -97,7 +97,7 @@ class Action:
         self.me = me
         self.amount = 0.0
 
-    def perform(self):
+    def perform(self) -> None:
         print("Model.actionsRecorder.recordAction(this); not called because deleted")
 
     def getAmount(self):
