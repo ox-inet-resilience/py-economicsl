@@ -1,6 +1,7 @@
 # python-destilledESL
 
 [![DOI](https://zenodo.org/badge/95235014.svg)](https://zenodo.org/badge/latestdoi/95235014)
+[![Build Status](https://travis-ci.org/rht/py-destilledESL.svg?branch=master)](https://travis-ci.org/rht/py-destilledESL)
 
 This is a python port of the entirety of
 https://github.com/EconomicSL/destilledESL, further trimmed to its essence.

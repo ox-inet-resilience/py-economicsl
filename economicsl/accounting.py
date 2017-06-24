@@ -61,14 +61,11 @@ AccountType = enum(ASSET=1,
 #
 # A simple economic agent will usually have a single Ledger, whereas complex firms and banks can have several books
 # (as in branch banking for example).
-#
-# @author rafa
 class Ledger:
     def __init__(self, me):
         self.contractsToAssetAccounts = {}
-        self.allAssets = []
+        self.contracts = []
         self.equityAccounts = []
-        self.allLiabilities = []
         self.liabilityAccounts = []
         self.goodsAccounts = {}
         self.allGoods = {}
