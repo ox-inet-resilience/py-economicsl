@@ -18,6 +18,8 @@ easily here.
 
 ## Installation
 
+This library uses Python >=3.5 type system, so it runs only on python>=3.5.
+
 To install, run
 ```
 $ pip install git+https://github.com/rht/py-distilledESL
