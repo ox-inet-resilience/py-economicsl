@@ -7,7 +7,7 @@ def doubleEntry(debitAccount, creditAccount, amount):
 
 
 class Account:
-    def __init__(self, name, accountType, startingBalance=0.0):
+    def __init__(self, name, accountType, startingBalance=0.0) -> None:
         self.name = name
         self.accountType = accountType
         self.balance = startingBalance
@@ -62,7 +62,7 @@ AccountType = enum(ASSET=1,
 # A simple economic agent will usually have a single Ledger, whereas complex firms and banks can have several books
 # (as in branch banking for example).
 class Ledger:
-    def __init__(self, me):
+    def __init__(self, me) -> None:
         self.contractsToAssetAccounts = {}
         self.contracts = []
         self.equityAccounts = []

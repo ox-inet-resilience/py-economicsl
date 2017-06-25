@@ -1,3 +1,4 @@
+from typing import List
 from .accounting import Ledger
 from .obligations import ObligationMessage, ObligationsAndGoodsMailbox
 
@@ -6,8 +7,19 @@ from .accounting import doubleEntry, AccountType
 from .notenoughgoods import NotEnoughGoods
 
 
+class Simulation:
+    def __init__(self) -> None:
+        self.time = 0
+
+    def advance_time(self) -> None:
+        self.time += 1
+
+    def getTime(self) -> int:
+        return self.time
+
+
 class Agent:
-    def __init__(self, name, simulation):
+    def __init__(self, name: str, simulation: Simulation) -> None:
         self.name = name
         self.simulation = simulation
         self.alive = True
@@ -26,25 +38,25 @@ class Agent:
     def getName(self) -> str:
         return self.name
 
-    def getTime(self):
+    def getTime(self) -> int:
         return self.simulation.getTime()
 
-    def getSimulation(self):
+    def getSimulation(self) -> Simulation:
         return self.simulation
 
-    def isAlive(self):
+    def isAlive(self) -> bool:
         return self.alive
 
     def addCash(self, amount) -> None:
         self.mainLedger.addCash(amount)
 
-    def getCash_(self):
+    def getCash_(self) -> float:
         return self.mainLedger.getCash()
 
-    def getTotalCash(self):
+    def getTotalCash(self) -> float:
         return self.mainLedger.getCash()
 
-    def getMainLedger(self):
+    def getMainLedger(self) -> Ledger:
         return self.mainLedger
 
     def step(self) -> None:
@@ -54,7 +66,7 @@ class Agent:
         self.obligationsAndGoodsMailbox.step()
         self.mailbox.step()
 
-    def sendObligation(self, recipient, obligation) -> None:
+    def sendObligation(self, recipient, obligation: Obligation) -> None:
         if isinstance(obligation, ObligationMessage):
             recipient.receiveObligation(obligation)
             self.obligationsAndGoodsMailbox.addToObligationOutbox(obligation)
@@ -62,10 +74,10 @@ class Agent:
             msg = ObligationMessage(self, obligation)
             recipient.receiveMessage(msg)
 
-    def receiveObligation(self, obligation) -> None:
+    def receiveObligation(self, obligation: Obligation) -> None:
         self.obligationsAndGoodsMailbox.receiveObligation(obligation)
 
-    def receiveMessage(self, msg) -> None:
+    def receiveMessage(self, msg: ObligationMessage) -> None:
         if isinstance(msg, ObligationMessage):
             self.obligationsAndGoodsMailbox.receiveMessage(msg)
         else:
@@ -85,15 +97,15 @@ class Agent:
     def get_messages(self, topic=None):
         return self.mailbox.get_messages(topic)
 
-    def get_obligation_inbox(self):
+    def get_obligation_inbox(self) -> List[Obligation]:
         return self.obligationsAndGoodsMailbox.getObligation_inbox()
 
-    def get_obligation_outbox(self):
+    def get_obligation_outbox(self) -> List[Obligation]:
         return self.obligationsAndGoodsMailbox.getObligation_outbox()
 
 
 class Action:
-    def __init__(self, me):
+    def __init__(self, me: Agent) -> None:
         self.me = me
         self.amount = 0.0
 
@@ -103,47 +115,36 @@ class Action:
     def getAmount(self):
         return self.amount
 
-    def setAmount(self, amount):
+    def setAmount(self, amount: float):
         self.amount = amount
 
-    def getTime(self):
+    def getTime(self) -> int:
         return self.me.getTime()
 
-    def print(self, actions=None):
+    def print(self, actions=None) -> None:
         if actions:
             counter = 1
             for action in actions:
                 print("Action", counter, "->", action.getName())
                 counter += 1
 
-    def getAgent(self):
+    def getAgent(self) -> Agent:
         return self.me
 
-    def getSimulation(self):
+    def getSimulation(self) -> Simulation:
         return self.me.getSimulation()
 
 
-class Simulation:
-    def __init__(self):
-        self.time = 0
-
-    def advance_time(self):
-        self.time += 1
-
-    def getTime(self):
-        return self.time
-
-
 class Trade(Agent):
-    def __init__(self, name, simulation):
+    def __init__(self, name: str, simulation: Simulation) -> None:
         super().__init__(name, simulation)
 
     # Trade good one against good two
     def barter(self, trade_partner, name_get, amount_get, value_get, name_give,
-               amount_give, value_give):
+               amount_give, value_give) -> None:
         raise NotImplementedError
 
-    def give(self, recipient, good_name, amount_give):
+    def give(self, recipient: Agent, good_name: str, amount_give: float) -> None:
         value = self.getMainLedger().getPhysicalThingValue(good_name)
         self.getMainLedger().subtractGoods(good_name, amount_give)
         good_message = GoodMessage(good_name, amount_give, value)
@@ -151,32 +152,32 @@ class Trade(Agent):
 
 
 class Message:
-    def __init__(self, sender, topic, message):
+    def __init__(self, sender: Agent, topic: str, message) -> None:
         self.sender = sender
         self.message = message
         self.topic = topic
 
-    def getSender(self):
+    def getSender(self) -> Agent:
         return self.sender
 
     def getMessage(self):
         return self.message
 
-    def getTopic(self):
+    def getTopic(self) -> str:
         return self.topic
 
 
 class Mailbox:
-    def __init__(self):
+    def __init__(self) -> None:
         self.message_unopened = []
         self.message_inbox = []
 
-    def receiveMessage(self, msg):
+    def receiveMessage(self, msg) -> None:
         self.message_unopened.append(msg)
         # print("ObligationMessage sent. " + msg.getSender().getName() +
         #        " message: " + msg.getMessage());
 
-    def step(self):
+    def step(self) -> None:
         # Move all messages in the obligation_unopened to the obligation_inbox
         self.message_inbox += list(self.message_unopened)
 
@@ -184,7 +185,7 @@ class Mailbox:
 
         # Move all messages in the obligation_unopened to the obligation_inbox
 
-    def get_messages(self, topic=None):
+    def get_messages(self, topic=None) -> List[Message]:
         messages = []
         if not topic:
             messages = self.message_inbox
@@ -199,7 +200,7 @@ class Mailbox:
 
 
 class GoodMessage:
-    def __init__(self, good_name, amount, value):
+    def __init__(self, good_name: str, amount: float, value: float) -> None:
         self.good_name = good_name
         self.amount = amount
         self.value = value
@@ -223,7 +224,7 @@ class Contract:
 
 
 class BankersRounding:
-    def bankersRounding(self, value):
+    def bankersRounding(self, value: float) -> int:
         s = int(value)
         t = abs(value - s)
 

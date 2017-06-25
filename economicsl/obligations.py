@@ -1,5 +1,5 @@
 class Obligation:
-    def __init__(self, contract, amount, timeLeftToPay, simulation):
+    def __init__(self, contract, amount: float, timeLeftToPay: int, simulation) -> None:
         self.amount = amount
 
         self.from_ = contract.getLiabilityParty()
@@ -17,16 +17,16 @@ class Obligation:
     def fulfil(self):
         pass
 
-    def getAmount(self):
+    def getAmount(self) -> float:
         return self.amount
 
-    def isFulfilled(self):
+    def isFulfilled(self) -> bool:
         return self.fulfilled
 
-    def hasArrived(self):
+    def hasArrived(self) -> bool:
         return self.simulation.getTime() == self.timeToOpen
 
-    def isDue(self):
+    def isDue(self) -> bool:
         return self.simulation.getTime() == self.timeToPay
 
     def getFrom(self):
@@ -35,19 +35,19 @@ class Obligation:
     def getTo(self):
         return self.to
 
-    def setFulfilled(self):
+    def setFulfilled(self) -> None:
         self.fulfilled = True
 
-    def setAmount(self, amount):
+    def setAmount(self, amount) -> None:
         self.amount = amount
 
-    def getTimeToPay(self):
+    def getTimeToPay(self) -> int:
         return self.timeToPay
 
-    def getTimeToReceive(self):
+    def getTimeToReceive(self) -> int:
         return self.timeToReceive
 
-    def printObligation(self):
+    def printObligation(self) -> None:
         print("Obligation from ", self.getFrom().getName(), " to pay ",
               self.getTo().getName(), " an amount ", self.getAmount(),
               " on timestep ", self.getTimeToPay(), " to arrive by timestep ",
@@ -55,7 +55,7 @@ class Obligation:
 
 
 class ObligationMessage:
-    def __init__(self, sender, message):
+    def __init__(self, sender, message) -> None:
         self.sender = sender
         self.message = message
         self._is_read = False
@@ -67,12 +67,12 @@ class ObligationMessage:
         self._is_read = True
         return self.message
 
-    def is_read(self):
+    def is_read(self) -> bool:
         return self._is_read
 
 
 class ObligationsAndGoodsMailbox:
-    def __init__(self):
+    def __init__(self) -> None:
         self.obligation_unopened = []
         self.obligation_outbox = []
         self.obligation_inbox = []
@@ -80,7 +80,7 @@ class ObligationsAndGoodsMailbox:
         self.obligationMessage_inbox = []
         self.goods_inbox = []
 
-    def receiveObligation(self, obligation):
+    def receiveObligation(self, obligation) -> None:
         self.obligation_unopened.append(obligation)
 
         print("Obligation sent. ", obligation.getFrom().getName(),
@@ -88,40 +88,40 @@ class ObligationsAndGoodsMailbox:
               obligation.getTo().getName(),
               " on timestep ", obligation.getTimeToPay())
 
-    def receiveMessage(self, msg):
+    def receiveMessage(self, msg) -> None:
         self.obligationMessage_unopened.append(msg)
         # print("ObligationMessage sent. " + msg.getSender().getName() +
         #        " message: " + msg.getMessage());
 
-    def receiveGoodMessage(self, good_message):
+    def receiveGoodMessage(self, good_message) -> None:
         print(good_message)
         self.goods_inbox.append(good_message)
         # print("ObligationMessage sent. " + msg.getSender().getName() +
         #        " message: " + msg.getMessage());
 
-    def addToObligationOutbox(self, obligation):
+    def addToObligationOutbox(self, obligation) -> None:
         self.obligation_outbox.append(obligation)
 
-    def getMaturedObligations(self):
+    def getMaturedObligations(self) -> float:
         return sum([o.getAmount() for o in self.obligation_inbox if o.isDue() and not o.isFulfilled()])
 
-    def getAllPendingObligations(self):
+    def getAllPendingObligations(self) -> float:
         return sum([o.getAmount() for o in self.obligation_inbox if not o.isFulfilled()])
 
-    def getPendingPaymentsToMe(self):
+    def getPendingPaymentsToMe(self) -> float:
         return sum([o.getAmount() for o in self.obligation_outbox if o.isFulfilled()])
 
-    def fulfilAllRequests(self):
+    def fulfilAllRequests(self) -> None:
         for o in self.obligation_inbox:
             if not o.isFulfilled():
                 o.fulfil()
 
-    def fulfilMaturedRequests(self):
+    def fulfilMaturedRequests(self) -> None:
         for o in self.obligation_inbox:
             if o.isDue() and not o.isFulfilled():
                 o.fulfil()
 
-    def step(self):
+    def step(self) -> None:
         # Remove all fulfilled requests
         self.obligation_inbox = [o for o in self.obligation_inbox if not o.isFulfilled()]
         self.obligation_outbox = [o for o in self.obligation_outbox if not o.isFulfilled()]
@@ -146,7 +146,7 @@ class ObligationsAndGoodsMailbox:
 
         # Move all messages in the obligation_unopened to the obligation_inbox
 
-    def printMailbox(self):
+    def printMailbox(self) -> None:
         if ((not self.obligation_unopened) and (not self.obligation_inbox) and
            (not self.obligation_outbox)):
             print("\nObligationsAndGoodsMailbox is empty.")
