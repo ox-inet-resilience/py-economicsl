@@ -65,16 +65,6 @@ AccountType = enum(ASSET=1,
 # (as in branch banking for example).
 class Ledger:
     def __init__(self, me) -> None:
-        self.contractsToAssetAccounts = {}
-        self.inventory = Inventory()
-        self.equityAccounts = []
-        self.liabilityAccounts = []
-        self.goodsAccounts = {}
-        self.contractsToLiabilityAccounts = {}
-        self.me = me
-        self.equityAccount = Account("equityAccounts", AccountType.EQUITY)
-        self.assetAccounts = []
-
         # A StressLedger is a list of accounts (for quicker searching)
 
         # Each Account includes an inventory to hold one type of contract.
@@ -83,23 +73,31 @@ class Ledger:
         # type (such as Loan) can sometimes be an asset and sometimes a liability.
 
         # A book is initially created with a cash account and an equityAccounts account (it's the simplest possible book)
+        self.assetAccounts = {}  # a hashmap from a contract to a assetAccount
+        self.inventory = Inventory()
+        self.equityAccounts = []
+        self.goodsAccounts = {}
+        self.liabilityAccounts = {}  # a hashmap from a contract to a liabilityAccount
+        self.me = me
+        # equityAccount for goods
+        self.equityAccount = Account("equityAccounts", AccountType.EQUITY)
         self.addAccount(self.equityAccount, None)
 
     def getAssetValue(self) -> np.longdouble:
-        return sum([aa.getBalance() for aa in self.assetAccounts])
+        return sum([aa.getBalance() for aa in self.assetAccounts.values()])
 
     def getLiabilityValue(self) -> np.longdouble:
-        return sum([la.getBalance() for la in self.liabilityAccounts])
+        return sum([la.getBalance() for la in self.liabilityAccounts.values()])
 
     def getEquityValue(self) -> np.longdouble:
         return sum([ea.getBalance() for ea in self.equityAccounts])
 
     def getAssetValueOf(self, contractType) -> np.longdouble:
-        # return contractsToAssetAccounts.get(contractType).getBalance();
+        # return assetAccounts.get(contractType).getBalance();
         return sum([c.getValue(self.me) for c in self.inventory.allAssets if isinstance(c, contractType)])
 
     def getLiabilityValueOf(self, contractType) -> np.longdouble:
-        # return contractsToLiabilityAccounts.get(contractType).getBalance();
+        # return liabilityAccounts.get(contractType).getBalance();
         return sum([c.getValue(self.me) for c in self.inventory.allLiabilities if isinstance(c, contractType)])
 
     def getAllAssets(self):
@@ -117,11 +115,9 @@ class Ledger:
     def addAccount(self, account, contractType):
         switch = account.getAccountType()
         if switch == AccountType.ASSET:
-            self.assetAccounts.append(account)
-            self.contractsToAssetAccounts[contractType] = account
+            self.assetAccounts[contractType] = account
         elif switch == AccountType.LIABILITY:
-            self.liabilityAccounts.append(account)
-            self.contractsToLiabilityAccounts[contractType] = account
+            self.liabilityAccounts[contractType] = account
         elif switch == AccountType.EQUITY:
             self.equityAccounts.append(account)
 
@@ -131,7 +127,7 @@ class Ledger:
     # and crediting equity.
     # @param contract an Asset contract to add
     def addAsset(self, contract):
-        assetAccount = self.contractsToAssetAccounts.get(contract)
+        assetAccount = self.assetAccounts.get(contract)
 
         if assetAccount is None:
             # If there doesn't exist an Account to hold this type of contract, we create it
@@ -147,7 +143,7 @@ class Ledger:
     # relevant to that type of contract.
     # @param contract a Liability contract to add
     def addLiability(self, contract):
-        liabilityAccount = self.contractsToLiabilityAccounts.get(contract)
+        liabilityAccount = self.liabilityAccounts.get(contract)
 
         if liabilityAccount is None:
             # If there doesn't exist an Account to hold this type of contract, we create it
@@ -173,7 +169,7 @@ class Ledger:
             except:
                 raise NotEnoughGoods(name, 0, amount)
         else:
-            self.inventory.substractGoods(name, amount)
+            self.inventory.subtractGoods(name, amount)
             doubleEntry(self.equityAccount, self.getGoodsAccount(name), amount * value)
 
     def getGoodsAccount(self, name):
@@ -203,14 +199,14 @@ class Ledger:
         # (dr cash, cr equity)
         self.addGoods("cash", amount, 1.0)
 
-    def substractCash(self, amount):
+    def subtractCash(self, amount):
         self.subtractGoods("cash", amount, 1.0)
 
     # Operation to pay back a liability loan; debit liability and credit cash
     # @param amount amount to pay back
     # @param loan the loan which is being paid back
     def payLiability(self, amount, loan):
-        self.liabilityAccount = self.contractsToLiabilityAccounts.get(loan)
+        self.liabilityAccount = self.liabilityAccounts.get(loan)
 
         assert self.inventory.getCash() >= amount  # Pre-condition: liquidity has been raised.
 
@@ -220,10 +216,10 @@ class Ledger:
     # If I've sold an asset, debit cash and credit asset
     # @param amount the *value* of the asset
     def sellAsset(self, amount, assetType):
-        self.assetAccount = self.contractsToAssetAccounts.get(assetType)
+        assetAccount = self.assetAccounts.get(assetType)
 
         # (dr cash, cr asset)
-        doubleEntry(self.getGoodsAccount("cash"), self.assetAccount, amount)
+        doubleEntry(self.getGoodsAccount("cash"), assetAccount, amount)
 
     # Operation to cancel a Loan to someone (i.e. cash in a Loan in the Assets side).
     #
@@ -236,7 +232,7 @@ class Ledger:
 
     def printBalanceSheet(self, me):
         print("Asset accounts:\n---------------")
-        for a in self.assetAccounts:
+        for a in self.assetAccounts.values():
             print(a.getName(), "-> %.2f" % a.getBalance())
 
         print("Breakdown: ")
@@ -245,7 +241,7 @@ class Ledger:
         print("TOTAL ASSETS: %.2f" % self.getAssetValue())
 
         print("\nLiability accounts:\n---------------")
-        for a in self.liabilityAccounts:
+        for a in self.liabilityAccounts.values():
             print(a.getName(me), " -> %.2f" % a.getBalance())
         for c in self.inventory.allLiabilities:
             print("\t", c.getName(me), " > ", c.getValue(me))
@@ -267,16 +263,10 @@ class Ledger:
         self.initialEquity = self.getEquityValue()
 
     def getAccountFromContract(self, contract):
-        return self.contractsToAssetAccounts.get(contract)
+        return self.assetAccounts.get(contract)
 
     def getCashAccount(self):
         return self.getGoodsAccount("cash")
-
-    def getContractsToAssetAccounts(self):
-        return self.contractsToAssetAccounts
-
-    def getContractsToLiabilityAccounts(self):
-        return self.contractsToLiabilityAccounts
 
     def getEquityAccount(self):
         return self.equityAccount
@@ -284,7 +274,7 @@ class Ledger:
     # if an Asset loses value, I must debit equity and credit asset
     # @param valueLost the value lost
     def devalueAsset(self, asset, valueLost):
-        assetAccount = self.getContractsToAssetAccounts().get(asset)
+        assetAccount = self.assetAccounts.get(asset)
 
         # (dr equityAccounts, cr assetAccounts)
         doubleEntry(self.getEquityAccount(), assetAccount, valueLost)
@@ -292,17 +282,17 @@ class Ledger:
         # Todo: perform a check here that the Asset account balances match the value of the assets. (?)
 
     def appreciateAsset(self, asset, valueLost):
-        assetAccount = self.getContractsToAssetAccounts().get(asset)
+        assetAccount = self.assetAccounts.get(asset)
         doubleEntry(assetAccount, self.getEquityAccount(), valueLost)
 
     def devalueLiability(self, liability, valueLost):
-        liabilityAccount = self.getContractsToLiabilityAccounts().get(liability)
+        liabilityAccount = self.liabilityAccounts.get(liability)
 
         # (dr equityAccounts, cr assetAccounts)
         doubleEntry(liabilityAccount, self.getEquityAccount(), valueLost)
 
     def appreciateLiability(self, liability, valueLost):
-        liabilityAccount = self.getContractsToLiabilityAccounts().get(liability)
+        liabilityAccount = self.liabilityAccounts.get(liability)
 
         # (dr equityAccounts, cr assetAccounts)
         doubleEntry(self.getEquityAccount(), liabilityAccount, valueLost)
