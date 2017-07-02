@@ -51,7 +51,7 @@ class Agent:
         self.mainLedger.addCash(amount)
 
     def getCash_(self) -> float:
-        return self.mainLedger.getCash()
+        return self.mainLedger.inventory.getCash()
 
     def getTotalCash(self) -> float:
         return self.mainLedger.getCash()

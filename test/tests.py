@@ -20,7 +20,7 @@ class End2EndTest(unittest.TestCase):
             print("Time step:", time)
             print("^^^^^^^^^^^^^")
             for i in range(NUM_AGENTS):
-                quantity = giveandreceives[i].getMainLedger().getGood("ball")
+                quantity = giveandreceives[i].getMainLedger().inventory.getGood("ball")
                 if quantity > 0.9:
                     print("%d has ball %d" % (i, quantity))
                 if i + 1 < NUM_AGENTS:

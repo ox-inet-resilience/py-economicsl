@@ -1,3 +1,4 @@
+from collections import defaultdict
 import numpy as np
 from .notenoughgoods import NotEnoughGoods
 
@@ -65,17 +66,14 @@ AccountType = enum(ASSET=1,
 class Ledger:
     def __init__(self, me) -> None:
         self.contractsToAssetAccounts = {}
-        self.contracts = []
+        self.inventory = Inventory()
         self.equityAccounts = []
         self.liabilityAccounts = []
         self.goodsAccounts = {}
-        self.allGoods = {}
         self.contractsToLiabilityAccounts = {}
         self.me = me
         self.equityAccount = Account("equityAccounts", AccountType.EQUITY)
         self.assetAccounts = []
-        self.allAssets = []
-        self.allLiabilities = []
 
         # A StressLedger is a list of accounts (for quicker searching)
 
@@ -86,8 +84,6 @@ class Ledger:
 
         # A book is initially created with a cash account and an equityAccounts account (it's the simplest possible book)
         self.addAccount(self.equityAccount, None)
-
-        self.allGoods["cash"] = 0.0
 
     def getAssetValue(self) -> np.longdouble:
         return sum([aa.getBalance() for aa in self.assetAccounts])
@@ -100,31 +96,23 @@ class Ledger:
 
     def getAssetValueOf(self, contractType) -> np.longdouble:
         # return contractsToAssetAccounts.get(contractType).getBalance();
-        return sum([c.getValue(self.me) for c in self.allAssets if isinstance(c, contractType)])
+        return sum([c.getValue(self.me) for c in self.inventory.allAssets if isinstance(c, contractType)])
 
     def getLiabilityValueOf(self, contractType) -> np.longdouble:
         # return contractsToLiabilityAccounts.get(contractType).getBalance();
-        return sum([c.getValue(self.me) for c in self.allLiabilities if isinstance(c, contractType)])
+        return sum([c.getValue(self.me) for c in self.inventory.allLiabilities if isinstance(c, contractType)])
 
     def getAllAssets(self):
-        return self.allAssets
+        return self.inventory.allAssets
 
     def getAllLiabilities(self):
-        return self.allLiabilities
+        return self.inventory.allLiabilities
 
     def getAssetsOfType(self, contractType):
-        return [c for c in self.allAssets if isinstance(c, contractType)]
+        return [c for c in self.inventory.allAssets if isinstance(c, contractType)]
 
     def getLiabilitiesOfType(self, contractType):
-        return [c for c in self.allLiabilities if isinstance(c, contractType)]
-
-    def getGood(self, name):
-        if name not in self.allGoods:
-            self.allGoods[name] = 0.0
-        return self.allGoods[name]
-
-    def getCash(self) -> np.longdouble:
-        return self.getGood("cash")
+        return [c for c in self.inventory.allLiabilities if isinstance(c, contractType)]
 
     def addAccount(self, account, contractType):
         switch = account.getAccountType()
@@ -153,8 +141,7 @@ class Ledger:
         # (dr asset, cr equity)
         doubleEntry(assetAccount, self.equityAccount, contract.getValue(self.me))
 
-        # Add to the general inventory?
-        self.allAssets.append(contract)
+        self.inventory.allAssets.append(contract)
 
     # Adding a liability means debiting equity and crediting the account
     # relevant to that type of contract.
@@ -171,12 +158,10 @@ class Ledger:
         doubleEntry(self.equityAccount, liabilityAccount, contract.getValue(self.me))
 
         # Add to the general inventory?
-        self.allLiabilities.append(contract)
+        self.inventory.allLiabilities.append(contract)
 
     def addGoods(self, name, amount, value):
-        assert amount >= 0.0
-        have = self.allGoods.get(name, 0.0)
-        self.allGoods[name] = have + amount
+        self.inventory.addGoods(name, amount)
         physicalthingsaccount = self.getGoodsAccount(name)
         doubleEntry(physicalthingsaccount, self.equityAccount, amount * value)
 
@@ -188,11 +173,7 @@ class Ledger:
             except:
                 raise NotEnoughGoods(name, 0, amount)
         else:
-            assert amount >= 0.0
-            have = self.getGood(name)
-            if amount > have:
-                raise NotEnoughGoods(name, have, amount)
-            self.allGoods[name] = have - amount
+            self.inventory.substractGoods(name, amount)
             doubleEntry(self.equityAccount, self.getGoodsAccount(name), amount * value)
 
     def getGoodsAccount(self, name):
@@ -204,18 +185,15 @@ class Ledger:
 
     def getPhysicalThingValue(self, name):
         try:
-            return self.getGoodsAccount(name).getBalance() / self.getPhysicalThings(name)
+            return self.getGoodsAccount(name).getBalance() / self.inventory.getGood(name)
         except:
             return 0.0
-
-    def getPhysicalThings(self, name):
-        return self.allGoods.get(name)
 
     # Reevaluates the current stock of phisical goods at a specified value and books
     # the change to org.economicsl.accounting
     def revalueGoods(self, name, value):
         old_value = self.getGoodsAccount(name).getBalance()
-        new_value = self.allGoods.get(name) * value
+        new_value = self.inventory.getGood(name) * value
         if (new_value > old_value):
             doubleEntry(self.getGoodsAccount(name), self.equityAccount, new_value - old_value)
         elif (new_value < old_value):
@@ -234,7 +212,7 @@ class Ledger:
     def payLiability(self, amount, loan):
         self.liabilityAccount = self.contractsToLiabilityAccounts.get(loan)
 
-        assert self.getCash() >= amount  # Pre-condition: liquidity has been raised.
+        assert self.inventory.getCash() >= amount  # Pre-condition: liquidity has been raised.
 
         # (dr liability, cr cash )
         doubleEntry(self.liabilityAccount, self.getGoodsAccount("cash"), amount)
@@ -262,14 +240,14 @@ class Ledger:
             print(a.getName(), "-> %.2f" % a.getBalance())
 
         print("Breakdown: ")
-        for c in self.allAssets:
+        for c in self.inventory.allAssets:
             print("\t", c.getName(me), " > ", c.getValue(me))
         print("TOTAL ASSETS: %.2f" % self.getAssetValue())
 
         print("\nLiability accounts:\n---------------")
         for a in self.liabilityAccounts:
             print(a.getName(me), " -> %.2f" % a.getBalance())
-        for c in self.allLiabilities:
+        for c in self.inventory.allLiabilities:
             print("\t", c.getName(me), " > ", c.getValue(me))
         print("TOTAL LIABILITIES: %.2f" % self.getLiabilityValue())
         print("\nTOTAL EQUITY: %.2f" % self.getEquityValue())
@@ -328,3 +306,29 @@ class Ledger:
 
         # (dr equityAccounts, cr assetAccounts)
         doubleEntry(self.getEquityAccount(), liabilityAccount, valueLost)
+
+
+class Inventory:
+    def __init__(self):
+        self.contracts = []
+        self.allGoods = defaultdict(float)
+        self.allAssets = []
+        self.allLiabilities = []
+        self.allGoods["cash"] = 0.0
+
+    def getGood(self, name):
+        return self.allGoods[name]
+
+    def getCash(self) -> np.longdouble:
+        return self.getGood("cash")
+
+    def addGoods(self, name, amount):
+        assert amount >= 0.0
+        self.allGoods[name] += amount
+
+    def subtractGoods(self, name, amount):
+        assert amount >= 0.0
+        have = self.getGood(name)
+        if amount > have:
+            raise NotEnoughGoods(name, have, amount)
+        self.allGoods[name] = have - amount
