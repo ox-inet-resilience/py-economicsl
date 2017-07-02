@@ -1,14 +1,15 @@
 class Obligation:
-    def __init__(self, contract, amount: float, timeLeftToPay: int, simulation) -> None:
+    def __init__(self, contract, amount: float, timeLeftToPay: int) -> None:
         self.amount = amount
 
         self.from_ = contract.getLiabilityParty()
         self.to = contract.getAssetParty()
 
-        self.timeToOpen = simulation.getTime() + 1
-        self.timeToPay = simulation.getTime() + timeLeftToPay
+        # there is only one simulation shared by all agents
+        self.simulation = self.from_.getSimulation()
+        self.timeToOpen = self.simulation.getTime() + 1
+        self.timeToPay = self.simulation.getTime() + timeLeftToPay
         self.timeToReceive = self.timeToPay + 1
-        self.simulation = simulation
 
         assert self.timeToPay >= self.timeToOpen
 
