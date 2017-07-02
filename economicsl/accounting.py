@@ -74,6 +74,8 @@ class Ledger:
         self.me = me
         self.equityAccount = Account("equityAccounts", AccountType.EQUITY)
         self.assetAccounts = []
+        self.allAssets = []
+        self.allLiabilities = []
 
         # A StressLedger is a list of accounts (for quicker searching)
 
@@ -245,6 +247,15 @@ class Ledger:
         # (dr cash, cr asset)
         doubleEntry(self.getGoodsAccount("cash"), self.assetAccount, amount)
 
+    # Operation to cancel a Loan to someone (i.e. cash in a Loan in the Assets side).
+    #
+    # I'm using this for simplicity but note that this is equivalent to selling an asset.
+    # @param amount the amount of loan that is cancelled
+    def pullFunding(self, amount, loan):
+        loanAccount = self.getAccountFromContract(loan)
+        # (dr cash, cr asset )
+        doubleEntry(self.getCashAccount(), loanAccount, amount)
+
     def printBalanceSheet(self, me):
         print("Asset accounts:\n---------------")
         for a in self.assetAccounts:
@@ -291,3 +302,29 @@ class Ledger:
 
     def getEquityAccount(self):
         return self.equityAccount
+
+    # if an Asset loses value, I must debit equity and credit asset
+    # @param valueLost the value lost
+    def devalueAsset(self, asset, valueLost):
+        assetAccount = self.getContractsToAssetAccounts().get(asset)
+
+        # (dr equityAccounts, cr assetAccounts)
+        doubleEntry(self.getEquityAccount(), assetAccount, valueLost)
+
+        # Todo: perform a check here that the Asset account balances match the value of the assets. (?)
+
+    def appreciateAsset(self, asset, valueLost):
+        assetAccount = self.getContractsToAssetAccounts().get(asset)
+        doubleEntry(assetAccount, self.getEquityAccount(), valueLost)
+
+    def devalueLiability(self, liability, valueLost):
+        liabilityAccount = self.getContractsToLiabilityAccounts().get(liability)
+
+        # (dr equityAccounts, cr assetAccounts)
+        doubleEntry(liabilityAccount, self.getEquityAccount(), valueLost)
+
+    def appreciateLiability(self, liability, valueLost):
+        liabilityAccount = self.getContractsToLiabilityAccounts().get(liability)
+
+        # (dr equityAccounts, cr assetAccounts)
+        doubleEntry(self.getEquityAccount(), liabilityAccount, valueLost)
