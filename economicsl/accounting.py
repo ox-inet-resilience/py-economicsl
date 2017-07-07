@@ -242,7 +242,7 @@ class Ledger:
 
         print("\nLiability accounts:\n---------------")
         for a in self.liabilityAccounts.values():
-            print(a.getName(me), " -> %.2f" % a.getBalance())
+            print(a.getName(), " -> %.2f" % a.getBalance())
         for c in self.inventory.allLiabilities:
             print("\t", c.getName(me), " > ", c.getValue(me))
         print("TOTAL LIABILITIES: %.2f" % self.getLiabilityValue())
