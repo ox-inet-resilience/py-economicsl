@@ -1,6 +1,6 @@
 from collections import defaultdict
 import numpy as np
-from .notenoughgoods import NotEnoughGoods
+from .abce import NotEnoughGoods
 
 
 def doubleEntry(debitAccount, creditAccount, amount: np.longdouble):
@@ -75,6 +75,7 @@ class Ledger:
         # A book is initially created with a cash account and an equityAccounts account (it's the simplest possible book)
         self.assetAccounts = {}  # a hashmap from a contract to a assetAccount
         self.inventory = Inventory()
+        self.contracts = Contracts()
         self.equityAccounts = []
         self.goodsAccounts = {}
         self.liabilityAccounts = {}  # a hashmap from a contract to a liabilityAccount
@@ -94,23 +95,23 @@ class Ledger:
 
     def getAssetValueOf(self, contractType) -> np.longdouble:
         # return assetAccounts.get(contractType).getBalance();
-        return sum([c.getValue(self.me) for c in self.inventory.allAssets if isinstance(c, contractType)])
+        return sum([c.getValue(self.me) for c in self.contracts.allAssets if isinstance(c, contractType)])
 
     def getLiabilityValueOf(self, contractType) -> np.longdouble:
         # return liabilityAccounts.get(contractType).getBalance();
-        return sum([c.getValue(self.me) for c in self.inventory.allLiabilities if isinstance(c, contractType)])
+        return sum([c.getValue(self.me) for c in self.contracts.allLiabilities if isinstance(c, contractType)])
 
     def getAllAssets(self):
-        return self.inventory.allAssets
+        return self.contracts.allAssets
 
     def getAllLiabilities(self):
-        return self.inventory.allLiabilities
+        return self.contracts.allLiabilities
 
     def getAssetsOfType(self, contractType):
-        return [c for c in self.inventory.allAssets if isinstance(c, contractType)]
+        return [c for c in self.contracts.allAssets if isinstance(c, contractType)]
 
     def getLiabilitiesOfType(self, contractType):
-        return [c for c in self.inventory.allLiabilities if isinstance(c, contractType)]
+        return [c for c in self.contracts.allLiabilities if isinstance(c, contractType)]
 
     def addAccount(self, account, contractType):
         switch = account.getAccountType()
@@ -137,7 +138,7 @@ class Ledger:
         # (dr asset, cr equity)
         doubleEntry(assetAccount, self.equityAccount, contract.getValue(self.me))
 
-        self.inventory.allAssets.append(contract)
+        self.contracts.allAssets.append(contract)
 
     # Adding a liability means debiting equity and crediting the account
     # relevant to that type of contract.
@@ -154,7 +155,7 @@ class Ledger:
         doubleEntry(self.equityAccount, liabilityAccount, contract.getValue(self.me))
 
         # Add to the general inventory?
-        self.inventory.allLiabilities.append(contract)
+        self.contracts.allLiabilities.append(contract)
 
     def addGoods(self, name, amount, value):
         self.inventory.addGoods(name, amount)
@@ -236,14 +237,14 @@ class Ledger:
             print(a.getName(), "-> %.2f" % a.getBalance())
 
         print("Breakdown: ")
-        for c in self.inventory.allAssets:
+        for c in self.contracts.allAssets:
             print("\t", c.getName(me), " > ", c.getValue(me))
         print("TOTAL ASSETS: %.2f" % self.getAssetValue())
 
         print("\nLiability accounts:\n---------------")
         for a in self.liabilityAccounts.values():
             print(a.getName(), " -> %.2f" % a.getBalance())
-        for c in self.inventory.allLiabilities:
+        for c in self.contracts.allLiabilities:
             print("\t", c.getName(me), " > ", c.getValue(me))
         print("TOTAL LIABILITIES: %.2f" % self.getLiabilityValue())
         print("\nTOTAL EQUITY: %.2f" % self.getEquityValue())
@@ -298,12 +299,15 @@ class Ledger:
         doubleEntry(self.getEquityAccount(), liabilityAccount, valueLost)
 
 
-class Inventory:
+class Contracts:
     def __init__(self):
-        self.contracts = []
-        self.allGoods = defaultdict(float)
         self.allAssets = []
         self.allLiabilities = []
+
+
+class Inventory:
+    def __init__(self):
+        self.allGoods = defaultdict(float)
         self.allGoods["cash"] = 0.0
 
     def getGood(self, name):

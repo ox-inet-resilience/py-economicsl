@@ -4,7 +4,7 @@ from .obligations import ObligationMessage, ObligationsAndGoodsMailbox
 
 from .obligations import Obligation
 from .accounting import doubleEntry, AccountType
-from .notenoughgoods import NotEnoughGoods
+from .abce import NotEnoughGoods
 
 
 class Simulation:
