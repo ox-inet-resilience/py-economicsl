@@ -1,6 +1,5 @@
-from collections import defaultdict
 import numpy as np
-from .abce import NotEnoughGoods
+from .abce import NotEnoughGoods, Inventory
 
 
 def doubleEntry(debitAccount, creditAccount, amount: np.longdouble):
@@ -303,26 +302,3 @@ class Contracts:
     def __init__(self):
         self.allAssets = []
         self.allLiabilities = []
-
-
-class Inventory:
-    def __init__(self):
-        self.allGoods = defaultdict(float)
-        self.allGoods["cash"] = 0.0
-
-    def getGood(self, name):
-        return self.allGoods[name]
-
-    def getCash(self) -> np.longdouble:
-        return self.getGood("cash")
-
-    def addGoods(self, name, amount):
-        assert amount >= 0.0
-        self.allGoods[name] += amount
-
-    def subtractGoods(self, name, amount):
-        assert amount >= 0.0
-        have = self.getGood(name)
-        if amount > have:
-            raise NotEnoughGoods(name, have, amount)
-        self.allGoods[name] = have - amount
