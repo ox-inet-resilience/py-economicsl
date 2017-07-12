@@ -61,7 +61,7 @@ class Agent:
 
     def step(self) -> None:
         for good_message in self.obligationsAndGoodsMailbox.goods_inbox:
-            self.getMainLedger().addGoods(good_message.good_name, good_message.amount, good_message.value)
+            self.getMainLedger().create(good_message.good_name, good_message.amount, good_message.value)
         self.obligationsAndGoodsMailbox.goods_inbox.clear()
         self.obligationsAndGoodsMailbox.step()
         self.mailbox.step()
@@ -146,7 +146,7 @@ class Trade(Agent):
 
     def give(self, recipient: Agent, good_name: str, amount_give: float) -> None:
         value = self.getMainLedger().getPhysicalThingValue(good_name)
-        self.getMainLedger().subtractGoods(good_name, amount_give)
+        self.getMainLedger().destroy(good_name, amount_give)
         good_message = GoodMessage(good_name, amount_give, value)
         recipient.receiveGoodMessage(good_message)
 

@@ -156,20 +156,20 @@ class Ledger:
         # Add to the general inventory?
         self.contracts.allLiabilities.append(contract)
 
-    def addGoods(self, name, amount, value):
-        self.inventory.addGoods(name, amount)
+    def create(self, name, amount, value):
+        self.inventory.create(name, amount)
         physicalthingsaccount = self.getGoodsAccount(name)
         doubleEntry(physicalthingsaccount, self.equityAccount, amount * value)
 
-    def subtractGoods(self, name, amount, value=None):
+    def destroy(self, name, amount, value=None):
         if value is None:
             try:
                 value = self.getPhysicalThingValue(name)
-                self.subtractGoods(name, amount, value)
+                self.destroy(name, amount, value)
             except:
                 raise NotEnoughGoods(name, 0, amount)
         else:
-            self.inventory.subtractGoods(name, amount)
+            self.inventory.destroy(name, amount)
             doubleEntry(self.equityAccount, self.getGoodsAccount(name), amount * value)
 
     def getGoodsAccount(self, name):
@@ -197,10 +197,10 @@ class Ledger:
 
     def addCash(self, amount):
         # (dr cash, cr equity)
-        self.addGoods("cash", amount, 1.0)
+        self.create("cash", amount, 1.0)
 
     def subtractCash(self, amount):
-        self.subtractGoods("cash", amount, 1.0)
+        self.destroy("cash", amount, 1.0)
 
     # Operation to pay back a liability loan; debit liability and credit cash
     # @param amount amount to pay back

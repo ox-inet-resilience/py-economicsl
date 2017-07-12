@@ -21,21 +21,21 @@ class NotEnoughGoods(Exception):
 # Accounting classes: Inventory
 
 class Inventory(defaultdict):
-    def __init__(self):
+    def __init__(self) -> None:
         # cash defaults to 0.0
         super(Inventory, self).__init__(np.longdouble)
 
-    def getGood(self, name):
+    def getGood(self, name) -> np.longdouble:
         return self[name]
 
     def getCash(self) -> np.longdouble:
         return self.getGood("cash")
 
-    def addGoods(self, name, amount):
+    def create(self, name, amount) -> None:
         assert amount >= 0.0
         self[name] += amount
 
-    def subtractGoods(self, name, amount):
+    def destroy(self, name, amount) -> None:
         assert amount >= 0.0
         have = self.getGood(name)
         if amount > have:
