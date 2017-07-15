@@ -94,11 +94,11 @@ class Ledger:
 
     def getAssetValueOf(self, contractType) -> np.longdouble:
         # return assetAccounts.get(contractType).getBalance();
-        return sum([c.getValue(self.me) for c in self.contracts.allAssets if isinstance(c, contractType)])
+        return sum([c.getValue() for c in self.contracts.allAssets if isinstance(c, contractType)])
 
     def getLiabilityValueOf(self, contractType) -> np.longdouble:
         # return liabilityAccounts.get(contractType).getBalance();
-        return sum([c.getValue(self.me) for c in self.contracts.allLiabilities if isinstance(c, contractType)])
+        return sum([c.getValue() for c in self.contracts.allLiabilities if isinstance(c, contractType)])
 
     def getAllAssets(self):
         return self.contracts.allAssets
@@ -135,7 +135,7 @@ class Ledger:
             self.addAccount(assetAccount, contract)
 
         # (dr asset, cr equity)
-        doubleEntry(assetAccount, self.equityAccount, contract.getValue(self.me))
+        doubleEntry(assetAccount, self.equityAccount, contract.getValue())
 
         self.contracts.allAssets.append(contract)
 
@@ -151,7 +151,7 @@ class Ledger:
             self.addAccount(liabilityAccount, contract)
 
         # (dr equity, cr liability)
-        doubleEntry(self.equityAccount, liabilityAccount, contract.getValue(self.me))
+        doubleEntry(self.equityAccount, liabilityAccount, contract.getValue())
 
         # Add to the general inventory?
         self.contracts.allLiabilities.append(contract)
@@ -237,14 +237,14 @@ class Ledger:
 
         print("Breakdown: ")
         for c in self.contracts.allAssets:
-            print("\t", c.getName(me), " > ", c.getValue(me))
+            print("\t", c.getName(me), " > ", c.getValue())
         print("TOTAL ASSETS: %.2f" % self.getAssetValue())
 
         print("\nLiability accounts:\n---------------")
         for a in self.liabilityAccounts.values():
             print(a.getName(), " -> %.2f" % a.getBalance())
         for c in self.contracts.allLiabilities:
-            print("\t", c.getName(me), " > ", c.getValue(me))
+            print("\t", c.getName(me), " > ", c.getValue())
         print("TOTAL LIABILITIES: %.2f" % self.getLiabilityValue())
         print("\nTOTAL EQUITY: %.2f" % self.getEquityValue())
 
