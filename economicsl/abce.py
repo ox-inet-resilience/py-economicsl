@@ -8,13 +8,13 @@ class NotEnoughGoods(Exception):
         self.available = available
         self.required = required
 
-    def getAvailable(self) -> float:
+    def getAvailable(self) -> np.longdouble:
         return self.available
 
-    def getRequired(self) -> float:
+    def getRequired(self) -> np.longdouble:
         return self.required
 
-    def getDifference(self) -> float:
+    def getDifference(self) -> np.longdouble:
         return self.required - self.available
 
 

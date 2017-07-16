@@ -1,4 +1,6 @@
 from typing import List
+import numpy as np
+
 from .accounting import Ledger
 from .obligations import ObligationMessage, ObligationsAndGoodsMailbox
 
@@ -50,7 +52,7 @@ class Agent:
     def addCash(self, amount) -> None:
         self.mainLedger.addCash(amount)
 
-    def getCash_(self) -> float:
+    def getCash_(self) -> np.longdouble:
         return self.mainLedger.inventory.getCash()
 
     def getMainLedger(self) -> Ledger:
@@ -112,7 +114,7 @@ class Action:
     def getAmount(self):
         return self.amount
 
-    def setAmount(self, amount: float):
+    def setAmount(self, amount: np.longdouble):
         self.amount = amount
 
     def getTime(self) -> int:
@@ -141,7 +143,7 @@ class Trade(Agent):
                amount_give, value_give) -> None:
         raise NotImplementedError
 
-    def give(self, recipient: Agent, good_name: str, amount_give: float) -> None:
+    def give(self, recipient: Agent, good_name: str, amount_give: np.longdouble) -> None:
         value = self.getMainLedger().getPhysicalThingValue(good_name)
         self.getMainLedger().destroy(good_name, amount_give)
         good_message = GoodMessage(good_name, amount_give, value)
@@ -197,7 +199,7 @@ class Mailbox:
 
 
 class GoodMessage:
-    def __init__(self, good_name: str, amount: float, value: float) -> None:
+    def __init__(self, good_name: str, amount: np.longdouble, value: np.longdouble) -> None:
         self.good_name = good_name
         self.amount = amount
         self.value = value
@@ -221,7 +223,7 @@ class Contract:
 
 
 class BankersRounding:
-    def bankersRounding(self, value: float) -> int:
+    def bankersRounding(self, value: np.longdouble) -> int:
         s = int(value)
         t = abs(value - s)
 

@@ -1,5 +1,8 @@
+import numpy as np
+
+
 class Obligation:
-    def __init__(self, contract, amount: float, timeLeftToPay: int) -> None:
+    def __init__(self, contract, amount: np.longdouble, timeLeftToPay: int) -> None:
         self.amount = amount
 
         self.from_ = contract.getLiabilityParty()
@@ -18,7 +21,7 @@ class Obligation:
     def fulfil(self):
         pass
 
-    def getAmount(self) -> float:
+    def getAmount(self) -> np.longdouble:
         return self.amount
 
     def isFulfilled(self) -> bool:
@@ -103,13 +106,13 @@ class ObligationsAndGoodsMailbox:
     def addToObligationOutbox(self, obligation) -> None:
         self.obligation_outbox.append(obligation)
 
-    def getMaturedObligations(self) -> float:
+    def getMaturedObligations(self) -> np.longdouble:
         return sum([o.getAmount() for o in self.obligation_inbox if o.isDue() and not o.isFulfilled()])
 
-    def getAllPendingObligations(self) -> float:
+    def getAllPendingObligations(self) -> np.longdouble:
         return sum([o.getAmount() for o in self.obligation_inbox if not o.isFulfilled()])
 
-    def getPendingPaymentsToMe(self) -> float:
+    def getPendingPaymentsToMe(self) -> np.longdouble:
         return sum([o.getAmount() for o in self.obligation_outbox if o.isFulfilled()])
 
     def fulfilAllRequests(self) -> None:
