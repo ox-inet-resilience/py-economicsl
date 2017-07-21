@@ -5,7 +5,7 @@ from .accounting import Ledger
 from .obligations import ObligationMessage, ObligationsAndGoodsMailbox
 
 from .obligations import Obligation
-from .accounting import doubleEntry, AccountType  # NOQA
+from .accounting import AccountType  # NOQA
 from .abce import NotEnoughGoods  # NOQA
 
 
