@@ -11,7 +11,7 @@ class Account:
     def __init__(self, name, accountType, startingBalance: np.longdouble=0.0) -> None:
         self.name = name
         self.accountType = accountType
-        self.balance = startingBalance
+        self.balance = np.longdouble(startingBalance)
 
     def doubleEntry(self, debitAccount, creditAccount, amount: np.longdouble):
         doubleEntry(debitAccount, creditAccount, amount)
@@ -195,12 +195,12 @@ class Ledger:
         elif (new_value < old_value):
             doubleEntry(self.equityAccount, self.getGoodsAccount(name), old_value - new_value)
 
-    def addCash(self, amount):
+    def addCash(self, amount: np.longdouble) -> None:
         # (dr cash, cr equity)
-        self.create("cash", amount, 1.0)
+        self.create("cash", np.longdouble(amount), 1.0)
 
-    def subtractCash(self, amount):
-        self.destroy("cash", amount, 1.0)
+    def subtractCash(self, amount: np.longdouble) -> None:
+        self.destroy("cash", np.longdouble(amount), 1.0)
 
     # Operation to pay back a liability loan; debit liability and credit cash
     # @param amount amount to pay back

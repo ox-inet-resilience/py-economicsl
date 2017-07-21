@@ -3,7 +3,7 @@ import numpy as np
 
 class Obligation:
     def __init__(self, contract, amount: np.longdouble, timeLeftToPay: int) -> None:
-        self.amount = amount
+        self.amount = np.longdouble(amount)
 
         self.from_ = contract.getLiabilityParty()
         self.to = contract.getAssetParty()

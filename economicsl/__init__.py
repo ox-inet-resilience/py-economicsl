@@ -5,8 +5,8 @@ from .accounting import Ledger
 from .obligations import ObligationMessage, ObligationsAndGoodsMailbox
 
 from .obligations import Obligation
-from .accounting import doubleEntry, AccountType
-from .abce import NotEnoughGoods
+from .accounting import doubleEntry, AccountType  # NOQA
+from .abce import NotEnoughGoods  # NOQA
 
 
 class Simulation:
@@ -49,7 +49,7 @@ class Agent:
     def isAlive(self) -> bool:
         return self.alive
 
-    def addCash(self, amount) -> None:
+    def addCash(self, amount: np.longdouble) -> None:
         self.mainLedger.addCash(amount)
 
     def getCash_(self) -> np.longdouble:
@@ -106,16 +106,16 @@ class Agent:
 class Action:
     def __init__(self, me: Agent) -> None:
         self.me = me
-        self.amount = 0.0
+        self.amount = np.longdouble(0.0)
 
     def perform(self) -> None:
         print("Model.actionsRecorder.recordAction(this); not called because deleted")
 
-    def getAmount(self):
+    def getAmount(self) -> np.longdouble:
         return self.amount
 
     def setAmount(self, amount: np.longdouble):
-        self.amount = amount
+        self.amount = np.longdouble(amount)
 
     def getTime(self) -> int:
         return self.me.getTime()
@@ -201,7 +201,7 @@ class Mailbox:
 class GoodMessage:
     def __init__(self, good_name: str, amount: np.longdouble, value: np.longdouble) -> None:
         self.good_name = good_name
-        self.amount = amount
+        self.amount = np.longdouble(amount)
         self.value = value
 
 
