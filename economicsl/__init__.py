@@ -17,7 +17,6 @@ class Agent(abce.Agent):
                  database, logger, random_seed, num_managers)
         self.name = (group, self.id)
         self.alive = True
-        self.mailbox = Mailbox()
         self.mainLedger = Ledger(self, self._haves)
         self.obligationsAndGoodsMailbox = ObligationsAndGoodsMailbox()
 
@@ -58,7 +57,6 @@ class Agent(abce.Agent):
             self.getMainLedger().create(good_message.good_name, good_message.amount, good_message.value)
         self.obligationsAndGoodsMailbox.goods_inbox.clear()
         self.obligationsAndGoodsMailbox.step()
-        self.mailbox.step()
 
     def sendObligation(self, recipient, obligation: Obligation) -> None:
         if isinstance(obligation, ObligationMessage):
@@ -123,77 +121,6 @@ class Action:
 
     def getSimulation(self):
         return self.me.getSimulation()
-
-
-class Trade(Agent):
-    def __init__(self, name, simulation):
-        super().__init__(name, simulation)
-
-    # Trade good one against good two
-    def barter(self, trade_partner, name_get, amount_get, value_get, name_give,
-               amount_give, value_give) -> None:
-        raise NotImplementedError
-
-    def give(self, recipient: Agent, good_name: str, amount_give: np.longdouble) -> None:
-        value = self.getMainLedger().getPhysicalThingValue(good_name)
-        self.getMainLedger().destroy(good_name, amount_give)
-        good_message = GoodMessage(good_name, amount_give, value)
-        recipient.receiveGoodMessage(good_message)
-
-
-class Message:
-    def __init__(self, sender: Agent, topic: str, message) -> None:
-        self.sender = sender
-        self.message = message
-        self.topic = topic
-
-    def getSender(self) -> Agent:
-        return self.sender
-
-    def getMessage(self):
-        return self.message
-
-    def getTopic(self) -> str:
-        return self.topic
-
-
-class Mailbox:
-    def __init__(self) -> None:
-        self.message_unopened = []
-        self.message_inbox = []
-
-    def receiveMessage(self, msg) -> None:
-        self.message_unopened.append(msg)
-        # print("ObligationMessage sent. " + msg.getSender().getName() +
-        #        " message: " + msg.getMessage());
-
-    def step(self) -> None:
-        # Move all messages in the obligation_unopened to the obligation_inbox
-        self.message_inbox += list(self.message_unopened)
-
-        self.message_unopened = []
-
-        # Move all messages in the obligation_unopened to the obligation_inbox
-
-    def get_messages(self, topic=None) -> List[Message]:
-        messages = []
-        if not topic:
-            messages = self.message_inbox
-            self.message_inbox = []
-        else:
-            # TODO this is probably fucking inefficient
-            for message in list(self.message_inbox):
-                if message.getTopic() == topic:
-                    messages.append(message)
-                    self.message_inbox.remove(message)
-        return messages
-
-
-class GoodMessage:
-    def __init__(self, good_name: str, amount: np.longdouble, value: np.longdouble) -> None:
-        self.good_name = good_name
-        self.amount = np.longdouble(amount)
-        self.value = value
 
 
 class Contract:
