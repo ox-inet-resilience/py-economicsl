@@ -6,28 +6,23 @@ from .obligations import ObligationMessage, ObligationsAndGoodsMailbox
 
 from .obligations import Obligation
 from .accounting import AccountType  # NOQA
-from .abce import NotEnoughGoods  # NOQA
+from abce import NotEnoughGoods  # NOQA
+import abce
 
 
-class Simulation:
-    def __init__(self) -> None:
-        self.time = 0
-
-    def advance_time(self) -> None:
-        self.time += 1
-
-    def getTime(self) -> int:
-        return self.time
-
-
-class Agent:
-    def __init__(self, name: str, simulation: Simulation) -> None:
-        self.name = name
-        self.simulation = simulation
+class Agent(abce.Agent):
+    def __init__(self, id, group, trade_logging,
+                 database, logger, random_seed, num_managers):
+        super().__init__(id, group, trade_logging,
+                 database, logger, random_seed, num_managers)
+        self.name = (group, self.id)
         self.alive = True
         self.mailbox = Mailbox()
-        self.mainLedger = Ledger(self)
+        self.mainLedger = Ledger(self, self._haves)
         self.obligationsAndGoodsMailbox = ObligationsAndGoodsMailbox()
+
+    def init(self, agent_parameters, sim_parameters):
+        self.simulation = sim_parameters
 
     def add(self, contract) -> None:
         if (contract.getAssetParty() == self):
@@ -37,23 +32,23 @@ class Agent:
             # This contract is a liability for me
             self.mainLedger.addLiability(contract)
 
-    def getName(self) -> str:
-        return self.name
+    def getName(self):
+        return str(self.name)
 
-    def getTime(self) -> int:
-        return self.simulation.getTime()
+    def getTime(self):
+        return self.simulation.time
 
-    def getSimulation(self) -> Simulation:
+    def getSimulation(self):
         return self.simulation
 
     def isAlive(self) -> bool:
         return self.alive
 
     def addCash(self, amount: np.longdouble) -> None:
-        self.mainLedger.addCash(amount)
+        self.mainLedger.inventory.create('money', amount)
 
     def getCash_(self) -> np.longdouble:
-        return self.mainLedger.inventory.getCash()
+        return self.mainLedger.inventory['money']
 
     def getMainLedger(self) -> Ledger:
         return self.mainLedger
@@ -88,16 +83,12 @@ class Agent:
     def printMailbox(self) -> None:
         self.obligationsAndGoodsMailbox.printMailbox()
 
-    def message(self, receiver, topic, content):
-        message = Message(self, topic, content)
-        receiver.receiveMessage(message)
-        return message
+    def message(self, receiver, topic, content, overload=None):
 
-    def get_messages(self, topic=None):
-        return self.mailbox.get_messages(topic)
+        if not isinstance(receiver, tuple):
+            receiver = receiver.name
+        super().message(receiver[0], receiver[1], topic, content)
 
-    def get_obligation_inbox(self) -> List[Obligation]:
-        return self.obligationsAndGoodsMailbox.getObligation_inbox()
 
     def get_obligation_outbox(self) -> List[Obligation]:
         return self.obligationsAndGoodsMailbox.getObligation_outbox()
@@ -130,12 +121,12 @@ class Action:
     def getAgent(self) -> Agent:
         return self.me
 
-    def getSimulation(self) -> Simulation:
+    def getSimulation(self):
         return self.me.getSimulation()
 
 
 class Trade(Agent):
-    def __init__(self, name: str, simulation: Simulation) -> None:
+    def __init__(self, name, simulation):
         super().__init__(name, simulation)
 
     # Trade good one against good two

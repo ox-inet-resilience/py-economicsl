@@ -1,5 +1,5 @@
 import numpy as np
-from .abce import NotEnoughGoods, Inventory
+from abce import NotEnoughGoods
 
 
 def doubleEntry(debitAccount, creditAccount, amount: np.longdouble):
@@ -59,7 +59,7 @@ AccountType = enum(ASSET=1,
 # A simple economic agent will usually have a single Ledger, whereas complex firms and banks can have several books
 # (as in branch banking for example).
 class Ledger:
-    def __init__(self, me) -> None:
+    def __init__(self, me, inventory) -> None:
         # A StressLedger is a list of accounts (for quicker searching)
 
         # Each Account includes an inventory to hold one type of contract.
@@ -69,7 +69,7 @@ class Ledger:
 
         # A book is initially created with a cash account (it's the simplest possible book)
         self.assetAccounts = {}  # a hashmap from a contract to a assetAccount
-        self.inventory = Inventory()
+        self.inventory = inventory
         self.contracts = Contracts()
         self.goodsAccounts = {}
         self.liabilityAccounts = {}  # a hashmap from a contract to a liabilityAccount
