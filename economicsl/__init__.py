@@ -18,7 +18,7 @@ class Agent(abce.Agent):
         self.name = (group, self.id)
         self.alive = True
         self.mainLedger = Ledger(self, self._haves)
-        self.obligationsAndGoodsMailbox = ObligationsAndGoodsMailbox()
+        self.obligationsAndGoodsMailbox = ObligationsAndGoodsMailbox(self)
 
     def init(self, agent_parameters, sim_parameters):
         self.simulation = sim_parameters
@@ -53,30 +53,16 @@ class Agent(abce.Agent):
         return self.mainLedger
 
     def step(self) -> None:
-        for good_message in self.obligationsAndGoodsMailbox.goods_inbox:
-            self.getMainLedger().create(good_message.good_name, good_message.amount, good_message.value)
-        self.obligationsAndGoodsMailbox.goods_inbox.clear()
         self.obligationsAndGoodsMailbox.step()
 
     def sendObligation(self, recipient, obligation: Obligation) -> None:
         if isinstance(obligation, ObligationMessage):
-            recipient.receiveObligation(obligation)
+            self.message(recipient.group, recipient.id, '!oblmsg', obligation)
             self.obligationsAndGoodsMailbox.addToObligationOutbox(obligation)
         else:
             msg = ObligationMessage(self, obligation)
-            recipient.receiveMessage(msg)
+            self.message(recipient.group, recipient.id, '!oblmsg', msg)
 
-    def receiveObligation(self, obligation: Obligation) -> None:
-        self.obligationsAndGoodsMailbox.receiveObligation(obligation)
-
-    def receiveMessage(self, msg: ObligationMessage) -> None:
-        if isinstance(msg, ObligationMessage):
-            self.obligationsAndGoodsMailbox.receiveMessage(msg)
-        else:
-            self.mailbox.receiveMessage(msg)
-
-    def receiveGoodMessage(self, good_message) -> None:
-        self.obligationsAndGoodsMailbox.receiveGoodMessage(good_message)
 
     def printMailbox(self) -> None:
         self.obligationsAndGoodsMailbox.printMailbox()

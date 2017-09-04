@@ -76,32 +76,15 @@ class ObligationMessage:
 
 
 class ObligationsAndGoodsMailbox:
-    def __init__(self) -> None:
+    def __init__(self, owner) -> None:
         self.obligation_unopened = []
         self.obligation_outbox = []
         self.obligation_inbox = []
         self.obligationMessage_unopened = []
         self.obligationMessage_inbox = []
         self.goods_inbox = []
+        self.owner = owner
 
-    def receiveObligation(self, obligation) -> None:
-        self.obligation_unopened.append(obligation)
-
-        print("Obligation sent. ", obligation.getFrom().getName(),
-              " must pay ", obligation.getAmount(), " to ",
-              obligation.getTo().getName(),
-              " on timestep ", obligation.getTimeToPay())
-
-    def receiveMessage(self, msg) -> None:
-        self.obligationMessage_unopened.append(msg)
-        # print("ObligationMessage sent. " + msg.getSender().getName() +
-        #        " message: " + msg.getMessage());
-
-    def receiveGoodMessage(self, good_message) -> None:
-        print(good_message)
-        self.goods_inbox.append(good_message)
-        # print("ObligationMessage sent. " + msg.getSender().getName() +
-        #        " message: " + msg.getMessage());
 
     def addToObligationOutbox(self, obligation) -> None:
         self.obligation_outbox.append(obligation)
@@ -126,6 +109,7 @@ class ObligationsAndGoodsMailbox:
                 o.fulfil()
 
     def step(self) -> None:
+        self.obligation_inbox.extend(self.owner.get_messages('!oblmsg'))
         # Remove all fulfilled requests
         self.obligation_inbox = [o for o in self.obligation_inbox if not o.isFulfilled()]
         self.obligation_outbox = [o for o in self.obligation_outbox if not o.isFulfilled()]
