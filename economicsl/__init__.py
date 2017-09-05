@@ -21,7 +21,12 @@ class Agent(abce.Agent):
         self.obligationsAndGoodsMailbox = ObligationsAndGoodsMailbox(self)
 
     def init(self, agent_parameters, sim_parameters):
+        super().init(agent_parameters, sim_parameters)
         self.simulation = sim_parameters
+
+    def _begin_subround(self):
+        super()._begin_subround()
+        self.step()
 
     def add(self, contract) -> None:
         if (contract.getAssetParty() == self.name):
