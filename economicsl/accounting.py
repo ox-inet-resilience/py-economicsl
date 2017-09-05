@@ -185,10 +185,10 @@ class Ledger:
 
     def addCash(self, amount: np.longdouble) -> None:
         # (dr cash, cr equity)
-        self.create("cash", np.longdouble(amount), 1.0)
+        self.create("money", np.longdouble(amount), 1.0)
 
     def subtractCash(self, amount: np.longdouble) -> None:
-        self.destroy("cash", np.longdouble(amount), 1.0)
+        self.destroy("money", np.longdouble(amount), 1.0)
 
     # Operation to pay back a liability loan; debit liability and credit cash
     # @param amount amount to pay back
@@ -199,7 +199,7 @@ class Ledger:
         assert self.inventory.getCash() >= amount  # Pre-condition: liquidity has been raised.
 
         # (dr liability, cr cash )
-        doubleEntry(self.liabilityAccount, self.getGoodsAccount("cash"), amount)
+        doubleEntry(self.liabilityAccount, self['money'], amount)
 
     # If I've sold an asset, debit cash and credit asset
     # @param amount the *value* of the asset
@@ -207,7 +207,7 @@ class Ledger:
         assetAccount = self.assetAccounts.get(assetType)
 
         # (dr cash, cr asset)
-        doubleEntry(self.getGoodsAccount("cash"), assetAccount, amount)
+        doubleEntry(self["money"], assetAccount, amount)
 
     # Operation to cancel a Loan to someone (i.e. cash in a Loan in the Assets side).
     #
@@ -254,7 +254,7 @@ class Ledger:
         return self.assetAccounts.get(contract)
 
     def getCashAccount(self):
-        return self.getGoodsAccount("cash")
+        return self["money"]
 
     # if an Asset loses value, I must debit equity and credit asset
     # @param valueLost the value lost
