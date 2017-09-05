@@ -24,12 +24,15 @@ class Agent(abce.Agent):
         self.simulation = sim_parameters
 
     def add(self, contract) -> None:
-        if (contract.getAssetParty() == self):
+        if (contract.getAssetParty() == self.name):
             # This contract is an asset for me.
             self.mainLedger.addAsset(contract)
-        elif (contract.getLiabilityParty() == self):
+        elif (contract.getLiabilityParty() == self.name):
             # This contract is a liability for me
             self.mainLedger.addLiability(contract)
+        else:
+            print(contract, contract.getAssetParty(), contract.getLiabilityParty(), (self.name))
+            raise Exception("who the fuck is this" )
 
     def getName(self):
         return str(self.name)
