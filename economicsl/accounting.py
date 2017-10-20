@@ -13,15 +13,19 @@ class Account:
         self.accountType = accountType
         self.balance = np.longdouble(startingBalance)
 
-    # A Debit is a positive change for ASSET and EXPENSES accounts, and negative for the rest.
     def debit(self, amount: np.longdouble):
+        """
+        A Debit is a positive change for ASSET and EXPENSES accounts, and negative for the rest.
+        """
         if (self.accountType == AccountType.ASSET) or (self.accountType == AccountType.EXPENSES):
             self.balance += amount
         else:
             self.balance -= amount
 
-    # A Credit is a negative change for ASSET and EXPENSES accounts, and positive for the rest.
     def credit(self, amount: np.longdouble):
+        """
+        A Credit is a negative change for ASSET and EXPENSES accounts, and positive for the rest.
+        """
         if ((self.accountType == AccountType.ASSET) or (self.accountType == AccountType.EXPENSES)):
             self.balance -= amount
         else:
@@ -173,9 +177,11 @@ class Ledger:
         except:
             return 0.0
 
-    # Reevaluates the current stock of phisical goods at a specified value and books
-    # the change to org.economicsl.accounting
     def revalueGoods(self, name, value):
+        """
+        Reevaluate the current stock of physical goods at a specified value and book
+        the change to GoodsAccount.
+        """
         old_value = self.getGoodsAccount(name).getBalance()
         new_value = self.inventory.getGood(name) * value
         if (new_value > old_value):
@@ -240,8 +246,8 @@ class Ledger:
         # for (Contract contract : getLiabilitiesOfType(Repo.class)) {
         #    ((Repo) contract).printCollateral();
         # }
-        print("\n\nTotal cash: ", self.getGoodsAccount("cash").getBalance())
-        # print("Encumbered cash: "+me.getEncumberedCash());
+        print("\n\nTotal cash:", self.getGoodsAccount("cash").getBalance())
+        # print("Encumbered cash:", me.getEncumberedCash())
         # print("Unencumbered cash: " + (me.getCash_() - me.getEncumberedCash()));
 
     def getInitialEquity(self):
@@ -256,12 +262,14 @@ class Ledger:
     def getCashAccount(self):
         return self.getGoodsAccount("cash")
 
-    # if an Asset loses value, I must debit equity and credit asset
-    # @param valueLost the value lost
     def devalueAsset(self, asset, valueLost):
+        """
+        if an Asset loses value, I must credit asset
+        @param valueLost the value lost
+        """
         self.assetAccounts.get(asset).credit(valueLost)
 
-        # Todo: perform a check here that the Asset account balances match the value of the assets. (?)
+        # TODO: perform a check here that the Asset account balances match the value of the assets. (?)
 
     def appreciateAsset(self, asset, valueLost):
         self.assetAccounts.get(asset).debit(valueLost)
