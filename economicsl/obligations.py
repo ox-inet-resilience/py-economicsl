@@ -2,6 +2,8 @@ import numpy as np
 
 
 class Obligation:
+    __slots__ = ['amount', 'from_', 'to', 'timeToOpen', 'timeToPay', 'timeToReceive', 'simulation', 'fulfilled']
+
     def __init__(self, contract, amount: np.longdouble, timeLeftToPay: int) -> None:
         self.amount = np.longdouble(amount)
 
