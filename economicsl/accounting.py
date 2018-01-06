@@ -160,7 +160,7 @@ class Ledger:
             try:
                 value = self.getPhysicalThingValue(name)
                 self.destroy(name, amount, value)
-            except:
+            except Exception:
                 raise NotEnoughGoods(name, 0, amount)
         else:
             self.inventory.destroy(name, amount)
@@ -176,7 +176,7 @@ class Ledger:
     def getPhysicalThingValue(self, name):
         try:
             return self.getGoodsAccount(name).getBalance() / self.inventory.getGood(name)
-        except:
+        except Exception:
             return 0.0
 
     def revalueGoods(self, name, value):
