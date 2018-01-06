@@ -1,3 +1,4 @@
+from collections import defaultdict
 import numpy as np
 from .abce import NotEnoughGoods, Inventory
 
@@ -90,23 +91,24 @@ class Ledger:
 
     def getAssetValueOf(self, contractType) -> np.longdouble:
         # return assetAccounts.get(contractType).getBalance();
-        return sum([c.getValue() for c in self.contracts.allAssets if isinstance(c, contractType)])
+        return sum([c.getValue() for c in self.contracts.allAssets[contractType]])
 
     def getLiabilityValueOf(self, contractType) -> np.longdouble:
         # return liabilityAccounts.get(contractType).getBalance();
-        return sum([c.getValue() for c in self.contracts.allLiabilities if isinstance(c, contractType)])
+        return sum([c.getValue() for c in self.contracts.allLiabilities[contractType]])
 
     def getAllAssets(self):
-        return self.contracts.allAssets
+        return [asset for sublist in self.contracts.allAssets.values() for asset in sublist]
 
     def getAllLiabilities(self):
-        return self.contracts.allLiabilities
+        return [liability for sublist in self.contracts.allLiabilities.values()
+                for liability in sublist]
 
     def getAssetsOfType(self, contractType):
-        return [c for c in self.contracts.allAssets if isinstance(c, contractType)]
+        return self.contracts.allAssets[contractType]
 
     def getLiabilitiesOfType(self, contractType):
-        return [c for c in self.contracts.allLiabilities if isinstance(c, contractType)]
+        return self.contracts.allLiabilities[contractType]
 
     def addAccount(self, account, contractType):
         switch = account.getAccountType()
@@ -130,7 +132,7 @@ class Ledger:
 
         assetAccount.debit(contract.getValue())
 
-        self.contracts.allAssets.append(contract)
+        self.contracts.allAssets[type(contract)].append(contract)
 
     # Adding a liability means debiting equity and crediting the account
     # relevant to that type of contract.
@@ -146,7 +148,7 @@ class Ledger:
         liabilityAccount.credit(contract.getValue())
 
         # Add to the general inventory?
-        self.contracts.allLiabilities.append(contract)
+        self.contracts.allLiabilities[type(contract)].append(contract)
 
     def create(self, name, amount, value):
         self.inventory.create(name, amount)
@@ -230,14 +232,14 @@ class Ledger:
             print(a.getName(), "-> %.2f" % a.getBalance())
 
         print("Breakdown: ")
-        for c in self.contracts.allAssets:
+        for c in self.getAllAssets():
             print("\t", c.getName(me), " > ", c.getValue())
         print("TOTAL ASSETS: %.2f" % self.getAssetValue())
 
         print("\nLiability accounts:\n---------------")
         for a in self.liabilityAccounts.values():
             print(a.getName(), " -> %.2f" % a.getBalance())
-        for c in self.contracts.allLiabilities:
+        for c in self.getAllLiabilities():
             print("\t", c.getName(me), " > ", c.getValue())
         print("TOTAL LIABILITIES: %.2f" % self.getLiabilityValue())
         print("\nTOTAL EQUITY: %.2f" % self.getEquityValue())
@@ -283,5 +285,5 @@ class Ledger:
 
 class Contracts:
     def __init__(self):
-        self.allAssets = []
-        self.allLiabilities = []
+        self.allAssets = defaultdict(list)
+        self.allLiabilities = defaultdict(list)
