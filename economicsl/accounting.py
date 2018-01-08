@@ -177,7 +177,7 @@ class Ledger:
 
     def getPhysicalThingValue(self, name: str) -> np.longdouble:
         try:
-            return self.getGoodsAccount(name).getBalance() / self.inventory.getGood(name)
+            return self.getGoodsAccount(name).getBalance() / self.inventory.get_good(name)
         except Exception:
             return 0.0
 
@@ -187,7 +187,7 @@ class Ledger:
         the change to GoodsAccount.
         """
         old_value = self.getGoodsAccount(name).getBalance()
-        new_value = self.inventory.getGood(name) * value
+        new_value = self.inventory.get_good(name) * value
         if (new_value > old_value):
             self.getGoodsAccount(name).debit(new_value - old_value)
         elif (new_value < old_value):
@@ -206,7 +206,7 @@ class Ledger:
     def payLiability(self, amount, loan) -> None:
         liabilityAccount = self.liabilityAccounts.get(loan)
 
-        assert self.inventory.getCash() >= amount  # Pre-condition: liquidity has been raised.
+        assert self.inventory.get_cash() >= amount  # Pre-condition: liquidity has been raised.
 
         # (dr liability, cr cash )
         doubleEntry(liabilityAccount, self.getGoodsAccount("cash"), amount)

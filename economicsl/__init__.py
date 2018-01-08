@@ -50,7 +50,7 @@ class Agent:
         self.mainLedger.addCash(amount)
 
     def getCash_(self) -> np.longdouble:
-        return self.mainLedger.inventory.getCash()
+        return self.mainLedger.inventory.get_cash()
 
     def getMainLedger(self) -> Ledger:
         return self.mainLedger
