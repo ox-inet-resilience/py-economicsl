@@ -14,7 +14,7 @@ class Simulation:
     def advance_time(self) -> None:
         self.time += 1
 
-    def getTime(self) -> int:
+    def get_time(self) -> int:
         return self.time
 
 
@@ -23,59 +23,59 @@ class Agent:
         self.name = name
         self.simulation = simulation
         self.alive = True
-        self.mainLedger = Ledger(self)
+        self.main_ledger = Ledger(self)
         self.mailbox = Mailbox(self)
 
     def add(self, contract) -> None:
-        if (contract.getAssetParty() == self):
+        if (contract.get_asset_party() == self):
             # This contract is an asset for me.
-            self.mainLedger.addAsset(contract)
-        elif (contract.getLiabilityParty() == self):
+            self.main_ledger.add_asset(contract)
+        elif (contract.get_liability_party() == self):
             # This contract is a liability for me
-            self.mainLedger.addLiability(contract)
+            self.main_ledger.add_liability(contract)
 
-    def getName(self) -> str:
+    def get_name(self) -> str:
         return self.name
 
-    def getTime(self) -> int:
-        return self.simulation.getTime()
+    def get_time(self) -> int:
+        return self.simulation.get_time()
 
-    def getSimulation(self) -> Simulation:
+    def get_simulation(self) -> Simulation:
         return self.simulation
 
-    def isAlive(self) -> bool:
+    def is_alive(self) -> bool:
         return self.alive
 
-    def addCash(self, amount: np.longdouble) -> None:
-        self.mainLedger.addCash(amount)
+    def add_cash(self, amount: np.longdouble) -> None:
+        self.main_ledger.add_cash(amount)
 
-    def getCash_(self) -> np.longdouble:
-        return self.mainLedger.inventory.get_cash()
+    def get_cash_(self) -> np.longdouble:
+        return self.main_ledger.inventory.get_cash()
 
-    def getMainLedger(self) -> Ledger:
-        return self.mainLedger
+    def get_main_ledger(self) -> Ledger:
+        return self.main_ledger
 
     def step(self) -> None:
         self.mailbox.step()
 
-    def sendObligation(self, recipient, obligation: Obligation) -> None:
-        recipient.receiveObligation(obligation)
-        self.mailbox.addToObligationOutbox(obligation)
+    def send_obligation(self, recipient, obligation: Obligation) -> None:
+        recipient.receive_obligation(obligation)
+        self.mailbox.add_to_obligation_outbox(obligation)
 
-    def receiveObligation(self, obligation: Obligation) -> None:
-        self.mailbox.receiveObligation(obligation)
+    def receive_obligation(self, obligation: Obligation) -> None:
+        self.mailbox.receive_obligation(obligation)
 
-    def receiveGoodMessage(self, good_message) -> None:
-        self.mailbox.receiveGoodMessage(good_message)
+    def receive_good_message(self, good_message) -> None:
+        self.mailbox.receive_good_message(good_message)
 
-    def printMailbox(self) -> None:
-        self.mailbox.printMailbox()
+    def print_mailbox(self) -> None:
+        self.mailbox.print_mailbox()
 
     def get_obligation_inbox(self) -> List[Obligation]:
-        return self.mailbox.getObligation_inbox()
+        return self.mailbox.get_obligation_inbox()
 
     def get_obligation_outbox(self) -> List[Obligation]:
-        return self.mailbox.getObligation_outbox()
+        return self.mailbox.get_obligation_outbox()
 
 
 class Action:
@@ -86,27 +86,27 @@ class Action:
     def perform(self) -> None:
         print("Model.actionsRecorder.recordAction(this); not called because deleted")
 
-    def getAmount(self) -> np.longdouble:
+    def get_amount(self) -> np.longdouble:
         return self.amount
 
-    def setAmount(self, amount: np.longdouble):
+    def set_amount(self, amount: np.longdouble):
         self.amount = np.longdouble(amount)
 
-    def getTime(self) -> int:
-        return self.me.getTime()
+    def get_time(self) -> int:
+        return self.me.get_time()
 
     def print(self, actions=None) -> None:
         if actions:
             counter = 1
             for action in actions:
-                print("Action", counter, "->", action.getName())
+                print("Action", counter, "->", action.get_name())
                 counter += 1
 
-    def getAgent(self) -> Agent:
+    def get_agent(self) -> Agent:
         return self.me
 
-    def getSimulation(self) -> Simulation:
-        return self.me.getSimulation()
+    def get_simulation(self) -> Simulation:
+        return self.me.get_simulation()
 
 
 class Trade(Agent):
@@ -119,10 +119,10 @@ class Trade(Agent):
         raise NotImplementedError
 
     def give(self, recipient: Agent, good_name: str, amount_give: np.longdouble) -> None:
-        value = self.getMainLedger().getPhysicalThingValue(good_name)
-        self.getMainLedger().destroy(good_name, amount_give)
+        value = self.get_main_ledger().get_physical_thing_value(good_name)
+        self.get_main_ledger().destroy(good_name, amount_give)
         good_message = GoodMessage(good_name, amount_give, value)
-        recipient.receiveGoodMessage(good_message)
+        recipient.receive_good_message(good_message)
 
 
 class Message:
@@ -131,13 +131,13 @@ class Message:
         self.message = message
         self.topic = topic
 
-    def getSender(self) -> Agent:
+    def get_sender(self) -> Agent:
         return self.sender
 
-    def getMessage(self):
+    def get_message(self):
         return self.message
 
-    def getTopic(self) -> str:
+    def get_topic(self) -> str:
         return self.topic
 
 
@@ -149,24 +149,24 @@ class GoodMessage:
 
 
 class Contract:
-    def getAssetParty(self):
+    def get_asset_party(self):
         pass
 
-    def getLiabilityParty(self):
+    def get_liability_party(self):
         pass
 
-    def getValue(self, me):
+    def get_value(self, me):
         pass
 
-    def getAvailableActions(self, me):
+    def get_available_actions(self, me):
         pass
 
-    def getName(self, me):
+    def get_name(self, me):
         pass
 
 
 class BankersRounding:
-    def bankersRounding(self, value: np.longdouble) -> int:
+    def do_bankers_rounding(self, value: np.longdouble) -> int:
         s = int(value)
         t = abs(value - s)
 

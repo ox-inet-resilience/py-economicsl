@@ -7,13 +7,13 @@ class Obligation:
     def __init__(self, contract, amount: np.longdouble, timeLeftToPay: int) -> None:
         self.amount = np.longdouble(amount)
 
-        self.from_ = contract.getLiabilityParty()
-        self.to = contract.getAssetParty()
+        self.from_ = contract.get_liability_party()
+        self.to = contract.get_asset_party()
 
         # there is only one simulation shared by all agents
-        self.simulation = self.from_.getSimulation()
-        self.time_to_open = self.simulation.getTime() + 1
-        self.time_to_pay = self.simulation.getTime() + timeLeftToPay
+        self.simulation = self.from_.get_simulation()
+        self.time_to_open = self.simulation.get_time() + 1
+        self.time_to_pay = self.simulation.get_time() + timeLeftToPay
         self.time_to_receive = self.time_to_pay + 1
 
         assert self.time_to_pay >= self.time_to_open
@@ -30,10 +30,10 @@ class Obligation:
         return self.fulfilled
 
     def has_arrived(self) -> bool:
-        return self.simulation.getTime() == self.time_to_open
+        return self.simulation.get_time() == self.time_to_open
 
     def is_due(self) -> bool:
-        return self.simulation.getTime() == self.time_to_pay
+        return self.simulation.get_time() == self.time_to_pay
 
     def get_from(self):
         return self.from_
@@ -54,8 +54,8 @@ class Obligation:
         return self.time_to_receive
 
     def print_obligation(self) -> None:
-        print("Obligation from ", self.get_from().getName(), " to pay ",
-              self.get_to().getName(), " an amount ", self.get_amount(),
+        print("Obligation from ", self.get_from().get_name(), " to pay ",
+              self.get_to().get_name(), " an amount ", self.get_amount(),
               " on timestep ", self.get_time_to_pay(), " to arrive by timestep ",
               self.get_time_to_receive())
 
@@ -90,15 +90,15 @@ class Mailbox:
     def receive_obligation(self, obligation) -> None:
         self.obligation_unopened.append(obligation)
 
-        print("Obligation sent. ", obligation.get_from().getName(),
+        print("Obligation sent. ", obligation.get_from().get_name(),
               " must pay ", obligation.get_amount(), " to ",
-              obligation.get_to().getName(),
+              obligation.get_to().get_name(),
               " on timestep ", obligation.get_time_to_pay())
 
     def receive_good_message(self, good_message) -> None:
         print(good_message)
         self.goods_inbox.append(good_message)
-        # print("ObligationMessage sent. " + msg.get_sender().getName() +
+        # print("ObligationMessage sent. " + msg.get_sender().get_name() +
         #        " message: " + msg.get_message());
 
     def add_to_obligation_outbox(self, obligation) -> None:
@@ -127,7 +127,7 @@ class Mailbox:
     def step(self) -> None:
         # Process goods_inbox
         for good_message in self.goods_inbox:
-            self.me.getMainLedger().create(good_message.good_name, good_message.amount, good_message.value)
+            self.me.get_main_ledger().create(good_message.good_name, good_message.amount, good_message.value)
         self.goods_inbox.clear()
 
         # Remove all fulfilled requests
@@ -136,7 +136,7 @@ class Mailbox:
 
         # Remove all requests from agents who have defaulted.
         # TODO should be in model not in the library
-        self.obligation_outbox = [o for o in self.obligation_outbox if o.get_from().isAlive()]
+        self.obligation_outbox = [o for o in self.obligation_outbox if o.get_from().is_alive()]
 
         # Move all messages in the obligation_unopened to the obligation_inbox
         self.obligation_inbox += [o for o in self.obligation_unopened if o.has_arrived()]

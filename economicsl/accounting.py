@@ -93,11 +93,11 @@ class Ledger:
 
     def get_asset_value_of(self, contract_type) -> np.longdouble:
         # return asset_accounts.get(contractType).get_balance();
-        return sum([c.getValue() for c in self.contracts.all_assets[contract_type]])
+        return sum([c.get_value() for c in self.contracts.all_assets[contract_type]])
 
     def get_liability_value_of(self, contract_type) -> np.longdouble:
         # return liability_accounts.get(contractType).get_balance();
-        return sum([c.getValue() for c in self.contracts.all_liabilities[contract_type]])
+        return sum([c.get_value() for c in self.contracts.all_liabilities[contract_type]])
 
     def get_all_assets(self) -> List[Any]:
         return [asset for sublist in self.contracts.all_assets.values() for asset in sublist]
@@ -125,14 +125,14 @@ class Ledger:
     # and crediting equity.
     # @param contract an Asset contract to add
     def add_asset(self, contract) -> None:
-        assetAccount = self.asset_accounts.get(contract)
+        asset_account = self.asset_accounts.get(contract)
 
         if asset_account is None:
             # If there doesn't exist an Account to hold this type of contract, we create it
             asset_account = Account(contract.get_name(self.me), AccountType.ASSET)
             self.add_account(asset_account, contract)
 
-        asset_account.debit(contract.getValue())
+        asset_account.debit(contract.get_value())
 
         self.contracts.all_assets[type(contract)].append(contract)
 
@@ -147,7 +147,7 @@ class Ledger:
             liability_account = Account(contract.get_name(self.me), AccountType.LIABILITY)
             self.add_account(liability_account, contract)
 
-        liability_account.credit(contract.getValue())
+        liability_account.credit(contract.get_value())
 
         # Add to the general inventory?
         self.contracts.all_liabilities[type(contract)].append(contract)
@@ -209,7 +209,7 @@ class Ledger:
         assert self.inventory.get_cash() >= amount  # Pre-condition: liquidity has been raised.
 
         # (dr liability, cr cash )
-        doubleEntry(liability_account, self.get_goods_account("cash"), amount)
+        double_entry(liability_account, self.get_goods_account("cash"), amount)
 
     # If I've sold an asset, debit cash and credit asset
     # @param amount the *value* of the asset
@@ -235,14 +235,14 @@ class Ledger:
 
         print("Breakdown: ")
         for c in self.get_all_assets():
-            print("\t", c.get_name(me), " > ", c.getValue())
+            print("\t", c.get_name(me), " > ", c.get_value())
         print("TOTAL ASSETS: %.2f" % self.get_asset_value())
 
         print("\nLiability accounts:\n---------------")
         for a in self.liability_accounts.values():
             print(a.get_name(), " -> %.2f" % a.get_balance())
         for c in self.get_all_liabilities():
-            print("\t", c.get_name(me), " > ", c.getValue())
+            print("\t", c.get_name(me), " > ", c.get_value())
         print("TOTAL LIABILITIES: %.2f" % self.get_liability_value())
         print("\nTOTAL EQUITY: %.2f" % self.get_equity_value())
 
