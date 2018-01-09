@@ -202,12 +202,12 @@ class Ledger:
     # @param amount amount to pay back
     # @param loan the loan which is being paid back
     def payLiability(self, amount, loan):
-        self.liabilityAccount = self.liabilityAccounts.get(loan)
+        liabilityAccount = self.liabilityAccounts.get(loan)
 
         assert self.inventory.getCash() >= amount  # Pre-condition: liquidity has been raised.
 
         # (dr liability, cr cash )
-        doubleEntry(self.liabilityAccount, self.getGoodsAccount("cash"), amount)
+        doubleEntry(liabilityAccount, self.getGoodsAccount("cash"), amount)
 
     # If I've sold an asset, debit cash and credit asset
     # @param amount the *value* of the asset
