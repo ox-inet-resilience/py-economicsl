@@ -1,5 +1,7 @@
 from collections import defaultdict
 import numpy as np
+from typing import Any, List
+
 from .abce import NotEnoughGoods, Inventory
 
 
@@ -9,12 +11,12 @@ def doubleEntry(debitAccount, creditAccount, amount: np.longdouble):
 
 
 class Account:
-    def __init__(self, name, accountType, startingBalance: np.longdouble=0.0) -> None:
+    def __init__(self, name: str, accountType, startingBalance: np.longdouble=0.0) -> None:
         self.name = name
         self.accountType = accountType
         self.balance = np.longdouble(startingBalance)
 
-    def debit(self, amount: np.longdouble):
+    def debit(self, amount: np.longdouble) -> None:
         """
         A Debit is a positive change for ASSET and EXPENSES accounts, and negative for the rest.
         """
@@ -23,7 +25,7 @@ class Account:
         else:
             self.balance -= amount
 
-    def credit(self, amount: np.longdouble):
+    def credit(self, amount: np.longdouble) -> None:
         """
         A Credit is a negative change for ASSET and EXPENSES accounts, and positive for the rest.
         """
@@ -97,20 +99,20 @@ class Ledger:
         # return liabilityAccounts.get(contractType).getBalance();
         return sum([c.getValue() for c in self.contracts.allLiabilities[contractType]])
 
-    def getAllAssets(self):
+    def getAllAssets(self) -> List[Any]:
         return [asset for sublist in self.contracts.allAssets.values() for asset in sublist]
 
-    def getAllLiabilities(self):
+    def getAllLiabilities(self) -> List[Any]:
         return [liability for sublist in self.contracts.allLiabilities.values()
                 for liability in sublist]
 
-    def getAssetsOfType(self, contractType):
+    def getAssetsOfType(self, contractType) -> List[Any]:
         return self.contracts.allAssets[contractType]
 
-    def getLiabilitiesOfType(self, contractType):
+    def getLiabilitiesOfType(self, contractType) -> List[Any]:
         return self.contracts.allLiabilities[contractType]
 
-    def addAccount(self, account, contractType):
+    def addAccount(self, account, contractType) -> None:
         switch = account.getAccountType()
         if switch == AccountType.ASSET:
             self.assetAccounts[contractType] = account
@@ -122,7 +124,7 @@ class Ledger:
     # Adding an asset means debiting the account relevant to that type of contract
     # and crediting equity.
     # @param contract an Asset contract to add
-    def addAsset(self, contract):
+    def addAsset(self, contract) -> None:
         assetAccount = self.assetAccounts.get(contract)
 
         if assetAccount is None:
@@ -137,7 +139,7 @@ class Ledger:
     # Adding a liability means debiting equity and crediting the account
     # relevant to that type of contract.
     # @param contract a Liability contract to add
-    def addLiability(self, contract):
+    def addLiability(self, contract) -> None:
         liabilityAccount = self.liabilityAccounts.get(contract)
 
         if liabilityAccount is None:
@@ -150,12 +152,12 @@ class Ledger:
         # Add to the general inventory?
         self.contracts.allLiabilities[type(contract)].append(contract)
 
-    def create(self, name, amount, value):
+    def create(self, name: str, amount, value) -> None:
         self.inventory.create(name, amount)
         physicalthingsaccount = self.getGoodsAccount(name)
         physicalthingsaccount.debit(amount * value)
 
-    def destroy(self, name, amount, value=None):
+    def destroy(self, name: str, amount, value=None) -> None:
         if value is None:
             try:
                 value = self.getPhysicalThingValue(name)
@@ -166,20 +168,20 @@ class Ledger:
             self.inventory.destroy(name, amount)
             self.getGoodsAccount(name).credit(amount * value)
 
-    def getGoodsAccount(self, name):
+    def getGoodsAccount(self, name: str) -> Account:
         account = self.goodsAccounts.get(name)
         if account is None:
             account = Account(name, AccountType.GOOD)
             self.goodsAccounts[name] = account
         return account
 
-    def getPhysicalThingValue(self, name):
+    def getPhysicalThingValue(self, name: str) -> np.longdouble:
         try:
             return self.getGoodsAccount(name).getBalance() / self.inventory.getGood(name)
         except Exception:
             return 0.0
 
-    def revalueGoods(self, name, value):
+    def revalueGoods(self, name, value) -> None:
         """
         Reevaluate the current stock of physical goods at a specified value and book
         the change to GoodsAccount.
@@ -201,7 +203,7 @@ class Ledger:
     # Operation to pay back a liability loan; debit liability and credit cash
     # @param amount amount to pay back
     # @param loan the loan which is being paid back
-    def payLiability(self, amount, loan):
+    def payLiability(self, amount, loan) -> None:
         liabilityAccount = self.liabilityAccounts.get(loan)
 
         assert self.inventory.getCash() >= amount  # Pre-condition: liquidity has been raised.
@@ -211,7 +213,7 @@ class Ledger:
 
     # If I've sold an asset, debit cash and credit asset
     # @param amount the *value* of the asset
-    def sellAsset(self, amount, assetType):
+    def sellAsset(self, amount, assetType) -> None:
         assetAccount = self.assetAccounts.get(assetType)
 
         # (dr cash, cr asset)
@@ -221,12 +223,12 @@ class Ledger:
     #
     # I'm using this for simplicity but note that this is equivalent to selling an asset.
     # @param amount the amount of loan that is cancelled
-    def pullFunding(self, amount, loan):
+    def pullFunding(self, amount, loan) -> None:
         loanAccount = self.getAccountFromContract(loan)
         # (dr cash, cr asset )
         doubleEntry(self.getCashAccount(), loanAccount, amount)
 
-    def printBalanceSheet(self, me):
+    def printBalanceSheet(self, me) -> None:
         print("Asset accounts:\n---------------")
         for a in self.assetAccounts.values():
             print(a.getName(), "-> %.2f" % a.getBalance())
@@ -252,19 +254,19 @@ class Ledger:
         # print("Encumbered cash:", me.getEncumberedCash())
         # print("Unencumbered cash: " + (me.getCash_() - me.getEncumberedCash()));
 
-    def getInitialEquity(self):
+    def getInitialEquity(self) -> np.longdouble:
         return self.initialEquity
 
-    def setInitialValues(self):
+    def setInitialValues(self) -> None:
         self.initialEquity = self.getEquityValue()
 
     def getAccountFromContract(self, contract):
         return self.assetAccounts.get(contract)
 
-    def getCashAccount(self):
+    def getCashAccount(self) -> Account:
         return self.getGoodsAccount("cash")
 
-    def devalueAsset(self, asset, valueLost):
+    def devalueAsset(self, asset, valueLost) -> None:
         """
         if an Asset loses value, I must credit asset
         @param valueLost the value lost
@@ -273,13 +275,13 @@ class Ledger:
 
         # TODO: perform a check here that the Asset account balances match the value of the assets. (?)
 
-    def appreciateAsset(self, asset, valueLost):
+    def appreciateAsset(self, asset, valueLost) -> None:
         self.assetAccounts.get(asset).debit(valueLost)
 
-    def devalueLiability(self, liability, valueLost):
+    def devalueLiability(self, liability, valueLost) -> None:
         self.liabilityAccounts.get(liability).debit(valueLost)
 
-    def appreciateLiability(self, liability, valueLost):
+    def appreciateLiability(self, liability, valueLost) -> None:
         self.liabilityAccounts.get(liability).credit(valueLost)
 
 

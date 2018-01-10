@@ -3,7 +3,7 @@ import numpy as np
 
 
 class NotEnoughGoods(Exception):
-    def __init__(self, name, available, required) -> None:
+    def __init__(self, name: str, available, required) -> None:
         super().__init__(name + " available %d but required %d" % (available, required))
         self.available = available
         self.required = required
@@ -25,17 +25,17 @@ class Inventory(defaultdict):
         # cash defaults to 0.0
         super(Inventory, self).__init__(np.longdouble)
 
-    def getGood(self, name) -> np.longdouble:
+    def getGood(self, name: str) -> np.longdouble:
         return self[name]
 
     def getCash(self) -> np.longdouble:
         return self.getGood("cash")
 
-    def create(self, name, amount) -> None:
+    def create(self, name: str, amount) -> None:
         assert amount >= 0.0
         self[name] += amount
 
-    def destroy(self, name, amount) -> None:
+    def destroy(self, name: str, amount) -> None:
         assert amount >= 0.0
         have = self.getGood(name)
         if amount > have:
