@@ -65,8 +65,8 @@ class Agent:
         self.obligationsAndGoodsMailbox.step()
         self.mailbox.step()
 
-    def sendObligation(self, recipient, obligation: Obligation) -> None:
-        if isinstance(obligation, ObligationMessage):
+    def sendObligation(self, recipient, obligation) -> None:
+        if isinstance(obligation, Obligation):
             recipient.receiveObligation(obligation)
             self.obligationsAndGoodsMailbox.addToObligationOutbox(obligation)
         else:
