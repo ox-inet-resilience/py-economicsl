@@ -105,8 +105,8 @@ class ObligationsAndGoodsMailbox:
         # print("ObligationMessage sent. " + msg.getSender().getName() +
         #        " message: " + msg.getMessage());
 
-    def addToObligationOutbox(self, obligation) -> None:
-        self.obligation_outbox.append(obligation)
+    #def addToObligationOutbox(self, obligation) -> None:
+    #    self.obligation_outbox.append(obligation)
 
     def getMaturedObligations(self) -> np.longdouble:
         return sum([o.getAmount() for o in self.obligation_inbox if o.isDue() and not o.isFulfilled()])
