@@ -78,7 +78,8 @@ class ObligationMessage:
 
 
 class ObligationsAndGoodsMailbox:
-    def __init__(self) -> None:
+    def __init__(self, me) -> None:
+        self.me = me
         self.obligation_unopened = []
         self.obligation_outbox = []
         self.obligation_inbox = []
@@ -128,6 +129,11 @@ class ObligationsAndGoodsMailbox:
                 o.fulfil()
 
     def step(self) -> None:
+        # Process goods_inbox
+        for good_message in self.goods_inbox:
+            self.me.getMainLedger().create(good_message.good_name, good_message.amount, good_message.value)
+        self.goods_inbox.clear()
+
         # Remove all fulfilled requests
         self.obligation_inbox = [o for o in self.obligation_inbox if not o.isFulfilled()]
         self.obligation_outbox = [o for o in self.obligation_outbox if not o.isFulfilled()]

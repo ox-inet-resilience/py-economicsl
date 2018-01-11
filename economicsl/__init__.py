@@ -27,7 +27,7 @@ class Agent:
         self.alive = True
         self.mailbox = Mailbox()
         self.mainLedger = Ledger(self)
-        self.obligationsAndGoodsMailbox = ObligationsAndGoodsMailbox()
+        self.obligationsAndGoodsMailbox = ObligationsAndGoodsMailbox(self)
 
     def add(self, contract) -> None:
         if (contract.getAssetParty() == self):
@@ -59,9 +59,6 @@ class Agent:
         return self.mainLedger
 
     def step(self) -> None:
-        for good_message in self.obligationsAndGoodsMailbox.goods_inbox:
-            self.getMainLedger().create(good_message.good_name, good_message.amount, good_message.value)
-        self.obligationsAndGoodsMailbox.goods_inbox.clear()
         self.obligationsAndGoodsMailbox.step()
         self.mailbox.step()
 
