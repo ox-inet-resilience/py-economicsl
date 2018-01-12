@@ -95,11 +95,6 @@ class Mailbox:
               obligation.getTo().getName(),
               " on timestep ", obligation.getTimeToPay())
 
-    def receiveMessage(self, msg) -> None:
-        self.obligationMessage_unopened.append(msg)
-        # print("ObligationMessage sent. " + msg.getSender().getName() +
-        #        " message: " + msg.getMessage());
-
     def receiveGoodMessage(self, good_message) -> None:
         print(good_message)
         self.goods_inbox.append(good_message)
