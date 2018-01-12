@@ -2,9 +2,7 @@ from typing import List
 import numpy as np
 
 from .accounting import Ledger
-from .obligations import ObligationMessage, ObligationsAndGoodsMailbox
-
-from .obligations import Obligation
+from .obligations import Obligation, ObligationMessage, Mailbox
 from .accounting import AccountType  # NOQA
 from .abce import NotEnoughGoods  # NOQA
 
@@ -26,7 +24,7 @@ class Agent:
         self.simulation = simulation
         self.alive = True
         self.mainLedger = Ledger(self)
-        self.obligationsAndGoodsMailbox = ObligationsAndGoodsMailbox(self)
+        self.mailbox = Mailbox(self)
 
     def add(self, contract) -> None:
         if (contract.getAssetParty() == self):
@@ -58,33 +56,33 @@ class Agent:
         return self.mainLedger
 
     def step(self) -> None:
-        self.obligationsAndGoodsMailbox.step()
+        self.mailbox.step()
 
     def sendObligation(self, recipient, obligation) -> None:
         if isinstance(obligation, Obligation):
             recipient.receiveObligation(obligation)
-            self.obligationsAndGoodsMailbox.addToObligationOutbox(obligation)
+            self.mailbox.addToObligationOutbox(obligation)
         else:
             msg = ObligationMessage(self, obligation)
             recipient.receiveMessage(msg)
 
     def receiveObligation(self, obligation: Obligation) -> None:
-        self.obligationsAndGoodsMailbox.receiveObligation(obligation)
+        self.mailbox.receiveObligation(obligation)
 
     def receiveMessage(self, msg: ObligationMessage) -> None:
-        self.obligationsAndGoodsMailbox.receiveMessage(msg)
+        self.mailbox.receiveMessage(msg)
 
     def receiveGoodMessage(self, good_message) -> None:
-        self.obligationsAndGoodsMailbox.receiveGoodMessage(good_message)
+        self.mailbox.receiveGoodMessage(good_message)
 
     def printMailbox(self) -> None:
-        self.obligationsAndGoodsMailbox.printMailbox()
+        self.mailbox.printMailbox()
 
     def get_obligation_inbox(self) -> List[Obligation]:
-        return self.obligationsAndGoodsMailbox.getObligation_inbox()
+        return self.mailbox.getObligation_inbox()
 
     def get_obligation_outbox(self) -> List[Obligation]:
-        return self.obligationsAndGoodsMailbox.getObligation_outbox()
+        return self.mailbox.getObligation_outbox()
 
 
 class Action:

@@ -77,7 +77,7 @@ class ObligationMessage:
         return self._is_read
 
 
-class ObligationsAndGoodsMailbox:
+class Mailbox:
     def __init__(self, me) -> None:
         self.me = me
         self.obligation_unopened = []
