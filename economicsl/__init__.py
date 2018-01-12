@@ -25,7 +25,6 @@ class Agent:
         self.name = name
         self.simulation = simulation
         self.alive = True
-        self.mailbox = Mailbox()
         self.mainLedger = Ledger(self)
         self.obligationsAndGoodsMailbox = ObligationsAndGoodsMailbox(self)
 
@@ -60,7 +59,6 @@ class Agent:
 
     def step(self) -> None:
         self.obligationsAndGoodsMailbox.step()
-        self.mailbox.step()
 
     def sendObligation(self, recipient, obligation) -> None:
         if isinstance(obligation, Obligation):
@@ -74,24 +72,13 @@ class Agent:
         self.obligationsAndGoodsMailbox.receiveObligation(obligation)
 
     def receiveMessage(self, msg: ObligationMessage) -> None:
-        if isinstance(msg, ObligationMessage):
-            self.obligationsAndGoodsMailbox.receiveMessage(msg)
-        else:
-            self.mailbox.receiveMessage(msg)
+        self.obligationsAndGoodsMailbox.receiveMessage(msg)
 
     def receiveGoodMessage(self, good_message) -> None:
         self.obligationsAndGoodsMailbox.receiveGoodMessage(good_message)
 
     def printMailbox(self) -> None:
         self.obligationsAndGoodsMailbox.printMailbox()
-
-    def message(self, receiver, topic, content):
-        message = Message(self, topic, content)
-        receiver.receiveMessage(message)
-        return message
-
-    def get_messages(self, topic=None):
-        return self.mailbox.get_messages(topic)
 
     def get_obligation_inbox(self) -> List[Obligation]:
         return self.obligationsAndGoodsMailbox.getObligation_inbox()
@@ -161,38 +148,6 @@ class Message:
 
     def getTopic(self) -> str:
         return self.topic
-
-
-class Mailbox:
-    def __init__(self) -> None:
-        self.message_unopened = []
-        self.message_inbox = []
-
-    def receiveMessage(self, msg) -> None:
-        self.message_unopened.append(msg)
-        # print("ObligationMessage sent. " + msg.getSender().getName() +
-        #        " message: " + msg.getMessage());
-
-    def step(self) -> None:
-        # Move all messages in the obligation_unopened to the obligation_inbox
-        self.message_inbox += list(self.message_unopened)
-
-        self.message_unopened = []
-
-        # Move all messages in the obligation_unopened to the obligation_inbox
-
-    def get_messages(self, topic=None) -> List[Message]:
-        messages = []
-        if not topic:
-            messages = self.message_inbox
-            self.message_inbox = []
-        else:
-            # TODO this is probably fucking inefficient
-            for message in list(self.message_inbox):
-                if message.getTopic() == topic:
-                    messages.append(message)
-                    self.message_inbox.remove(message)
-        return messages
 
 
 class GoodMessage:
