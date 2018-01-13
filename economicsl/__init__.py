@@ -2,7 +2,7 @@ from typing import List
 import numpy as np
 
 from .accounting import Ledger
-from .obligations import Obligation, ObligationMessage, Mailbox
+from .obligations import Obligation, Mailbox
 from .accounting import AccountType  # NOQA
 from .abce import NotEnoughGoods  # NOQA
 
@@ -130,15 +130,20 @@ class Message:
         self.sender = sender
         self.message = message
         self.topic = topic
+        self._is_read = False
 
     def get_sender(self) -> Agent:
         return self.sender
 
     def get_message(self):
+        self._is_read = True
         return self.message
 
     def get_topic(self) -> str:
         return self.topic
+
+    def is_read(self) -> bool:
+        return self._is_read
 
 
 class GoodMessage:

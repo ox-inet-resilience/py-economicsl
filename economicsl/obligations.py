@@ -60,31 +60,12 @@ class Obligation:
               self.get_time_to_receive())
 
 
-class ObligationMessage:
-    def __init__(self, sender, message) -> None:
-        self.sender = sender
-        self.message = message
-        self._is_read = False
-
-    def get_sender(self):
-        return self.sender
-
-    def get_message(self):
-        self._is_read = True
-        return self.message
-
-    def is_read(self) -> bool:
-        return self._is_read
-
-
 class Mailbox:
     def __init__(self, me) -> None:
         self.me = me
         self.obligation_unopened = []
         self.obligation_outbox = []
         self.obligation_inbox = []
-        self.obligationMessage_unopened = []
-        self.obligationMessage_inbox = []
         self.goods_inbox = []
 
     def receive_obligation(self, obligation) -> None:
@@ -98,8 +79,6 @@ class Mailbox:
     def receive_good_message(self, good_message) -> None:
         print(good_message)
         self.goods_inbox.append(good_message)
-        # print("ObligationMessage sent. " + msg.get_sender().get_name() +
-        #        " message: " + msg.get_message());
 
     def add_to_obligation_outbox(self, obligation) -> None:
         self.obligation_outbox.append(obligation)
@@ -143,13 +122,6 @@ class Mailbox:
         self.obligation_unopened = [o for o in self.obligation_unopened if not o.has_arrived()]
 
         # Remove all fulfilled requests
-        self.obligationMessage_inbox = [o for o in self.obligationMessage_inbox if not o.is_read()]
-
-        # Move all messages in the obligation_unopened to the obligation_inbox
-        self.obligationMessage_inbox += list(self.obligationMessage_unopened)
-        self.obligationMessage_unopened = []
-
-        # Remove all fulfilled requests
         assert not self.goods_inbox
 
         # Move all messages in the obligation_unopened to the obligation_inbox
@@ -175,9 +147,6 @@ class Mailbox:
             for o in self.obligation_outbox:
                 o.print_obligation()
             print()
-
-    def get_message_inbox(self):
-        return self.obligationMessage_inbox
 
     def get_obligation_outbox(self):
         return self.obligation_outbox
