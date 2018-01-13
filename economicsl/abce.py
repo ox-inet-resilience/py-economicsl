@@ -8,13 +8,13 @@ class NotEnoughGoods(Exception):
         self.available = available
         self.required = required
 
-    def getAvailable(self) -> np.longdouble:
+    def get_available(self) -> np.longdouble:
         return self.available
 
-    def getRequired(self) -> np.longdouble:
+    def get_required(self) -> np.longdouble:
         return self.required
 
-    def getDifference(self) -> np.longdouble:
+    def get_difference(self) -> np.longdouble:
         return self.required - self.available
 
 
@@ -25,11 +25,11 @@ class Inventory(defaultdict):
         # cash defaults to 0.0
         super(Inventory, self).__init__(np.longdouble)
 
-    def getGood(self, name: str) -> np.longdouble:
+    def get_good(self, name: str) -> np.longdouble:
         return self[name]
 
-    def getCash(self) -> np.longdouble:
-        return self.getGood("cash")
+    def get_cash(self) -> np.longdouble:
+        return self.get_good("cash")
 
     def create(self, name: str, amount) -> None:
         assert amount >= 0.0
@@ -37,7 +37,7 @@ class Inventory(defaultdict):
 
     def destroy(self, name: str, amount) -> None:
         assert amount >= 0.0
-        have = self.getGood(name)
+        have = self.get_good(name)
         if amount > have:
             raise NotEnoughGoods(name, have, amount)
         self[name] = have - amount
