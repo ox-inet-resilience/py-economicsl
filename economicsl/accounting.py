@@ -83,7 +83,8 @@ class Ledger:
         self.me = me
 
     def get_asset_value(self) -> np.longdouble:
-        return sum([aa.get_balance() for aa in self.asset_accounts.values()])
+        return (sum([aa.get_balance() for aa in self.asset_accounts.values()]) +
+                self.inventory.get_cash())
 
     def get_liability_value(self) -> np.longdouble:
         return sum([la.get_balance() for la in self.liability_accounts.values()])
