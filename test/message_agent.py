@@ -9,11 +9,13 @@ class MessageAgent(economicsl.Agent):
         self.friend = friend
 
     def say(self):
-        self.message(self.friend, "hello", self.odd_or_even)
+        pass
+        # self.message(self.friend, "hello", self.odd_or_even)
 
     def hear(self):
-        for msg in self.get_messages():
-            print(msg.getMessage())
+        pass
+        # for msg in self.get_messages():
+        #     print(msg.getMessage())
 
     def set_friend(self, friend):
         self.friend = friend
