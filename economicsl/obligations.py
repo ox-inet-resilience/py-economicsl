@@ -65,8 +65,7 @@ class Mailbox:
         self.me = me
         self.obligation_unopened = []
         self.obligation_outbox = []
-        self.obligation_inbox = []
-        self.goods_inbox = []
+        self.inbox = {'obligation': [], 'goods': []}
 
     def receive_obligation(self, obligation) -> None:
         self.obligation_unopened.append(obligation)
@@ -78,28 +77,28 @@ class Mailbox:
 
     def receive_good_message(self, good_message) -> None:
         print(good_message)
-        self.goods_inbox.append(good_message)
+        self.inbox['goods'].append(good_message)
 
     def add_to_obligation_outbox(self, obligation) -> None:
         self.obligation_outbox.append(obligation)
 
     def get_matured_obligations(self) -> np.longdouble:
-        return sum([o.get_amount() for o in self.obligation_inbox if o.is_due() and
+        return sum([o.get_amount() for o in self.inbox["obligation"] if o.is_due() and
                     not o.is_fulfilled()])
 
     def get_all_pending_obligations(self) -> np.longdouble:
-        return sum([o.get_amount() for o in self.obligation_inbox if not o.is_fulfilled()])
+        return sum([o.get_amount() for o in self.inbox["obligation"] if not o.is_fulfilled()])
 
     def get_pending_payments_to_me(self) -> np.longdouble:
         return sum([o.get_amount() for o in self.obligation_outbox if o.is_fulfilled()])
 
     def fulfil_all_requests(self) -> None:
-        for o in self.obligation_inbox:
+        for o in self.inbox["obligation"]:
             if not o.is_fulfilled():
                 o.fulfil()
 
     def fulfil_matured_requests(self) -> None:
-        for o in self.obligation_inbox:
+        for o in self.inbox["obligation"]:
             if o.is_due() and not o.is_fulfilled():
                 o.fulfil()
 
@@ -107,10 +106,10 @@ class Mailbox:
         # Process goods_inbox
         for good_message in self.goods_inbox:
             self.me.get_main_ledger().create(good_message.good_name, good_message.amount, good_message.value)
-        self.goods_inbox.clear()
+        self.inbox['goods'].clear()
 
         # Remove all fulfilled requests
-        self.obligation_inbox = [o for o in self.obligation_inbox if not o.is_fulfilled()]
+        self.inbox["obligation"] = [o for o in self.inbox["obligation"] if not o.is_fulfilled()]
         self.obligation_outbox = [o for o in self.obligation_outbox if not o.is_fulfilled()]
 
         # Remove all requests from agents who have defaulted.
@@ -118,16 +117,16 @@ class Mailbox:
         self.obligation_outbox = [o for o in self.obligation_outbox if o.get_from().is_alive()]
 
         # Move all messages in the obligation_unopened to the obligation_inbox
-        self.obligation_inbox += [o for o in self.obligation_unopened if o.has_arrived()]
+        self.inbox["obligation"] += [o for o in self.obligation_unopened if o.has_arrived()]
         self.obligation_unopened = [o for o in self.obligation_unopened if not o.has_arrived()]
 
         # Remove all fulfilled requests
-        assert not self.goods_inbox
+        assert not self.inbox['goods']
 
         # Move all messages in the obligation_unopened to the obligation_inbox
 
     def print_mailbox(self) -> None:
-        if ((not self.obligation_unopened) and (not self.obligation_inbox) and
+        if ((not self.obligation_unopened) and (not self.inbox["obligation"]) and
            (not self.obligation_outbox)):
             print("\nObligationsAndGoodsMailbox is empty.")
         else:
@@ -137,9 +136,9 @@ class Mailbox:
             for o in self.obligation_unopened:
                 o.print_obligation()
 
-            if not (not self.obligation_inbox):
+            if not (not self.inbox["obligation"]):
                 print("Inbox:")
-            for o in self.obligation_inbox:
+            for o in self.inbox["obligation"]:
                 o.print_obligation()
 
             if not (not self.obligation_outbox):
@@ -152,4 +151,4 @@ class Mailbox:
         return self.obligation_outbox
 
     def get_obligation_inbox(self):
-        return self.obligation_inbox
+        return self.inbox["obligation"]
