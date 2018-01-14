@@ -67,17 +67,17 @@ class Mailbox:
         self.obligation_outbox = []
         self.inbox = {'obligation': [], 'goods': []}
 
-    def receive_obligation(self, obligation) -> None:
-        self.obligation_unopened.append(obligation)
+    def receive_message(self, message) -> None:
+        if isinstance(message, Obligation):
+            self.obligation_unopened.append(message)
 
-        print("Obligation sent. ", obligation.get_from().get_name(),
-              " must pay ", obligation.get_amount(), " to ",
-              obligation.get_to().get_name(),
-              " on timestep ", obligation.get_time_to_pay())
-
-    def receive_good_message(self, good_message) -> None:
-        print(good_message)
-        self.inbox['goods'].append(good_message)
+            print("Obligation sent. ", message.get_from().get_name(),
+                  " must pay ", message.get_amount(), " to ",
+                  message.get_to().get_name(),
+                  " on timestep ", message.get_time_to_pay())
+        else:
+            print(good_message)
+            self.inbox['goods'].append(good_message)
 
     def add_to_obligation_outbox(self, obligation) -> None:
         self.obligation_outbox.append(obligation)
@@ -103,8 +103,8 @@ class Mailbox:
                 o.fulfil()
 
     def step(self) -> None:
-        # Process goods_inbox
-        for good_message in self.goods_inbox:
+        # Process inbox["goods"]
+        for good_message in self.inbox["goods"]:
             self.me.get_main_ledger().create(good_message.good_name, good_message.amount, good_message.value)
         self.inbox['goods'].clear()
 

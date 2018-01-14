@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 import numpy as np
 
 from .accounting import Ledger
@@ -59,14 +59,11 @@ class Agent:
         self.mailbox.step()
 
     def send_obligation(self, recipient, obligation: Obligation) -> None:
-        recipient.receive_obligation(obligation)
+        recipient.receive_message(obligation)
         self.mailbox.add_to_obligation_outbox(obligation)
 
-    def receive_obligation(self, obligation: Obligation) -> None:
-        self.mailbox.receive_obligation(obligation)
-
-    def receive_good_message(self, good_message) -> None:
-        self.mailbox.receive_good_message(good_message)
+    def receive_message(self, message: Union[Obligation, 'GoodMessage']) -> None:
+        self.mailbox.receive_message(message)
 
     def print_mailbox(self) -> None:
         self.mailbox.print_mailbox()
@@ -122,7 +119,7 @@ class Trade(Agent):
         value = self.get_main_ledger().get_physical_thing_value(good_name)
         self.get_main_ledger().destroy(good_name, amount_give)
         good_message = GoodMessage(good_name, amount_give, value)
-        recipient.receive_good_message(good_message)
+        recipient.receive_message(good_message)
 
 
 class Message:
