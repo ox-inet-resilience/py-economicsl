@@ -83,11 +83,13 @@ class Ledger:
         self.me = me
 
     def get_asset_value(self) -> np.longdouble:
-        return (sum([aa.get_balance() for aa in self.asset_accounts.values()]) +
+        # return (sum([aa.get_balance() for aa in self.asset_accounts.values()]) +
+        return (sum([a.get_value() for sublist in self.contracts.all_assets.values() for a in sublist]) +
                 self.inventory.get_cash())
 
     def get_liability_value(self) -> np.longdouble:
-        return sum([la.get_balance() for la in self.liability_accounts.values()])
+        # return sum([la.get_balance() for la in self.liability_accounts.values()])
+        return sum([l.get_value() for sublist in self.contracts.all_liabilities.values() for l in sublist])
 
     def get_equity_value(self) -> np.longdouble:
         return self.get_asset_value() - self.get_liability_value()
