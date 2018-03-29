@@ -2,7 +2,7 @@ from typing import List, Union
 import numpy as np
 
 from .accounting import Ledger
-from .obligations import Obligation, Mailbox
+from .obligations import Obligation
 from .accounting import AccountType  # NOQA
 from .abce import NotEnoughGoods  # NOQA
 
@@ -148,6 +148,100 @@ class GoodMessage:
         self.good_name = good_name
         self.amount = np.longdouble(amount)
         self.value = value
+
+
+class Mailbox:
+    def __init__(self, me) -> None:
+        self.me = me
+        self.obligation_unopened = []
+        self.obligation_outbox = []
+        self.inbox = {'obligation': [], 'goods': []}
+
+    def receive_message(self, message) -> None:
+        if isinstance(message, Obligation):
+            self.obligation_unopened.append(message)
+
+            print("Obligation sent. ", message.get_from().get_name(),
+                  " must pay ", message.get_amount(), " to ",
+                  message.get_to().get_name(),
+                  " on timestep ", message.get_time_to_pay())
+        else:
+            print(message)
+            self.inbox['goods'].append(message)
+
+    def add_to_obligation_outbox(self, obligation) -> None:
+        self.obligation_outbox.append(obligation)
+
+    def get_matured_obligations(self) -> np.longdouble:
+        return sum([o.get_amount() for o in self.inbox["obligation"] if o.is_due() and
+                    not o.is_fulfilled()])
+
+    def get_all_pending_obligations(self) -> np.longdouble:
+        return sum([o.get_amount() for o in self.inbox["obligation"] if not o.is_fulfilled()])
+
+    def get_pending_payments_to_me(self) -> np.longdouble:
+        return sum([o.get_amount() for o in self.obligation_outbox if o.is_fulfilled()])
+
+    def fulfil_all_requests(self) -> None:
+        for o in self.inbox["obligation"]:
+            if not o.is_fulfilled():
+                o.fulfil()
+
+    def fulfil_matured_requests(self) -> None:
+        for o in self.inbox["obligation"]:
+            if o.is_due() and not o.is_fulfilled():
+                o.fulfil()
+
+    def step(self) -> None:
+        # Process inbox["goods"]
+        for good_message in self.inbox["goods"]:
+            self.me.get_main_ledger().create(good_message.good_name, good_message.amount, good_message.value)
+        self.inbox['goods'].clear()
+
+        # Remove all fulfilled requests
+        self.inbox["obligation"] = [o for o in self.inbox["obligation"] if not o.is_fulfilled()]
+        self.obligation_outbox = [o for o in self.obligation_outbox if not o.is_fulfilled()]
+
+        # Remove all requests from agents who have defaulted.
+        # TODO should be in model not in the library
+        self.obligation_outbox = [o for o in self.obligation_outbox if o.get_from().is_alive()]
+
+        # Move all messages in the obligation_unopened to the obligation_inbox
+        self.inbox["obligation"] += [o for o in self.obligation_unopened if o.has_arrived()]
+        self.obligation_unopened = [o for o in self.obligation_unopened if not o.has_arrived()]
+
+        # Remove all fulfilled requests
+        assert not self.inbox['goods']
+
+        # Move all messages in the obligation_unopened to the obligation_inbox
+
+    def print_mailbox(self) -> None:
+        if ((not self.obligation_unopened) and (not self.inbox["obligation"]) and
+           (not self.obligation_outbox)):
+            print("\nObligationsAndGoodsMailbox is empty.")
+        else:
+            print("\nObligationsAndGoodsMailbox contents:")
+            if not (not self.obligation_unopened):
+                print("Unopened messages:")
+            for o in self.obligation_unopened:
+                o.print_obligation()
+
+            if not (not self.inbox["obligation"]):
+                print("Inbox:")
+            for o in self.inbox["obligation"]:
+                o.print_obligation()
+
+            if not (not self.obligation_outbox):
+                print("Outbox:")
+            for o in self.obligation_outbox:
+                o.print_obligation()
+            print()
+
+    def get_obligation_outbox(self):
+        return self.obligation_outbox
+
+    def get_obligation_inbox(self):
+        return self.inbox["obligation"]
 
 
 class Contract:
