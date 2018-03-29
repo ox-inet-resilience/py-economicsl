@@ -155,7 +155,7 @@ class Mailbox:
         self.me = me
         self.obligation_unopened = []
         self.obligation_outbox = []
-        self.inbox = {'obligation': [], 'goods': []}
+        self.inbox = {'obligation': [], 'goods': [], 'cash': []}
 
     def receive_message(self, message) -> None:
         if isinstance(message, Obligation):
@@ -165,9 +165,11 @@ class Mailbox:
                   " must pay ", message.get_amount(), " to ",
                   message.get_to().get_name(),
                   " on timestep ", message.get_time_to_pay())
-        else:
+        elif isinstance(message, GoodMessage):
             print(message)
             self.inbox['goods'].append(message)
+        else:
+            self.inbox['cash'].append(message)
 
     def add_to_obligation_outbox(self, obligation) -> None:
         self.obligation_outbox.append(obligation)
@@ -193,6 +195,11 @@ class Mailbox:
                 o.fulfil()
 
     def step(self) -> None:
+        # Process inbox["cash"]
+        new_cash = sum(self.inbox["cash"])
+        self.me.add_cash(new_cash)
+        self.inbox["cash"].clear()
+
         # Process inbox["goods"]
         for good_message in self.inbox["goods"]:
             self.me.get_main_ledger().create(good_message.good_name, good_message.amount, good_message.value)
@@ -212,6 +219,7 @@ class Mailbox:
 
         # Remove all fulfilled requests
         assert not self.inbox['goods']
+        assert not self.inbox['cash']
 
         # Move all messages in the obligation_unopened to the obligation_inbox
 
