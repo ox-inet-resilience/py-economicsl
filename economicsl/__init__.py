@@ -81,7 +81,7 @@ class Action:
         self.amount = np.longdouble(0.0)
 
     def perform(self) -> None:
-        print("Model.actionsRecorder.recordAction(this); not called because deleted")
+        pass
 
     def get_amount(self) -> np.longdouble:
         return self.amount
