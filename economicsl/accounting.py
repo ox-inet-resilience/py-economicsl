@@ -94,8 +94,10 @@ class Ledger:
     def get_equity_value(self) -> np.longdouble:
         return self.get_asset_value() - self.get_liability_value()
 
-    def get_asset_value_of(self, contract_type) -> np.longdouble:
+    def get_asset_value_of(self, contract_type, contract_subtype=None) -> np.longdouble:
         # return asset_accounts.get(contractType).get_balance();
+        if contract_subtype:
+            return sum([c.get_value() for c in self.contracts.all_assets[contract_type] if c.get_asset_type() == contract_subtype])
         return sum([c.get_value() for c in self.contracts.all_assets[contract_type]])
 
     def get_liability_value_of(self, contract_type) -> np.longdouble:
