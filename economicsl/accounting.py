@@ -5,6 +5,9 @@ from typing import Any, List
 from .abce import NotEnoughGoods, Inventory
 
 
+eps = 1e-10
+
+
 def double_entry(debit_account, credit_account, amount: np.longdouble):
     debit_account.debit(amount)
     credit_account.credit(amount)
@@ -211,7 +214,8 @@ class Ledger:
     def pay_liability(self, amount, loan) -> None:
         liability_account = self.liability_accounts.get(loan)
 
-        assert self.inventory.get_cash() >= amount  # Pre-condition: liquidity has been raised.
+        # Pre-condition: liquidity has been raised.
+        assert (self.inventory.get_cash() - amount) >= -eps, (self.inventory.get_cash(), amount)  
 
         # (dr liability, cr cash )
         double_entry(liability_account, self.get_goods_account("cash"), amount)
