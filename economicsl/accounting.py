@@ -1,8 +1,8 @@
-from collections import defaultdict
 import numpy as np
 from typing import Any, List
 
 from .abce import NotEnoughGoods, Inventory
+from .contract import Contracts
 
 
 eps = 1e-10
@@ -292,9 +292,3 @@ class Ledger:
 
     def appreciate_liability(self, liability, valueLost) -> None:
         self.liability_accounts.get(liability).credit(valueLost)
-
-
-class Contracts:
-    def __init__(self):
-        self.all_assets = defaultdict(list)
-        self.all_liabilities = defaultdict(list)

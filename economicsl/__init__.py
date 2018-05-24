@@ -247,23 +247,6 @@ class Mailbox:
         return self.inbox["obligation"]
 
 
-class Contract:
-    def get_asset_party(self):
-        pass
-
-    def get_liability_party(self):
-        pass
-
-    def get_value(self, me):
-        pass
-
-    def get_available_actions(self, me):
-        pass
-
-    def get_name(self, me):
-        pass
-
-
 class BankersRounding:
     def do_bankers_rounding(self, value: np.longdouble) -> int:
         s = int(value)
