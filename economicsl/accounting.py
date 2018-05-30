@@ -8,11 +8,6 @@ from .contract import Contracts
 eps = 1e-10
 
 
-def double_entry(debit_account, credit_account, amount: np.longdouble):
-    debit_account.debit(amount)
-    credit_account.credit(amount)
-
-
 class Account:
     def __init__(self, name: str, account_type, starting_balance: np.longdouble=0.0) -> None:
         self.name = name
@@ -215,10 +210,10 @@ class Ledger:
         liability_account = self.liability_accounts.get(loan)
 
         # Pre-condition: liquidity has been raised.
-        assert (self.inventory.get_cash() - amount) >= -eps, (self.inventory.get_cash(), amount)  
+        assert (self.inventory.get_cash() - amount) >= -eps, (self.inventory.get_cash(), amount)
 
         # (dr liability, cr cash )
-        double_entry(liability_account, self.get_goods_account("cash"), amount)
+        self.book(liability_account, self.get_goods_account("cash"), amount)
 
     # If I've sold an asset, debit cash and credit asset
     # @param amount the *value* of the asset
@@ -226,7 +221,7 @@ class Ledger:
         asset_account = self.asset_accounts.get(assetType)
 
         # (dr cash, cr asset)
-        double_entry(self.get_goods_account("cash"), asset_account, amount)
+        self.book(self.get_goods_account("cash"), asset_account, amount)
 
     # Operation to cancel a Loan to someone (i.e. cash in a Loan in the Assets side).
     #
@@ -235,7 +230,7 @@ class Ledger:
     def pull_funding(self, amount, loan) -> None:
         loan_account = self.get_account_from_contract(loan)
         # (dr cash, cr asset )
-        double_entry(self.get_cash_account(), loan_account, amount)
+        self.book(self.get_cash_account(), loan_account, amount)
 
     def print_balance_sheet(self, me) -> None:
         print("Asset accounts:\n---------------")
@@ -292,3 +287,7 @@ class Ledger:
 
     def appreciate_liability(self, liability, valueLost) -> None:
         self.liability_accounts.get(liability).credit(valueLost)
+
+    def book(self, debit_account, credit_account, amount: np.longdouble):
+        debit_account.debit(amount)
+        credit_account.credit(amount)
