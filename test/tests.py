@@ -27,6 +27,7 @@ class End2EndTest(unittest.TestCase):
                     giveandreceives[i].give(giveandreceives[i + 1])
             for a in giveandreceives:
                 a.step()
+            simulation.process_postbox()
             simulation.advance_time()
 
     # def test_message(self):
