@@ -18,13 +18,34 @@ class Simulation:
         return self.time
 
 
-class Agent:
+class Messenger:
+    def __init__(self):
+        self.mailbox = Mailbox(self)
+
+    def send_obligation(self, recipient, obligation: Obligation) -> None:
+        recipient.receive_message(obligation)
+        self.mailbox.add_to_obligation_outbox(obligation)
+
+    def receive_message(self, message: Union[Obligation, 'GoodMessage']) -> None:
+        self.mailbox.receive_message(message)
+
+    def print_mailbox(self) -> None:
+        self.mailbox.print_mailbox()
+
+    def get_obligation_inbox(self) -> List[Obligation]:
+        return self.mailbox.get_obligation_inbox()
+
+    def get_obligation_outbox(self) -> List[Obligation]:
+        return self.mailbox.get_obligation_outbox()
+
+
+class Agent(Messenger):
     def __init__(self, name: str, simulation: Simulation) -> None:
+        super().__init__()
         self.name = name
         self.simulation = simulation
         self.alive = True
         self.main_ledger = Ledger(self)
-        self.mailbox = Mailbox(self)
 
     def add(self, contract) -> None:
         if (contract.get_asset_party() == self):
@@ -57,22 +78,6 @@ class Agent:
 
     def step(self) -> None:
         self.mailbox.step()
-
-    def send_obligation(self, recipient, obligation: Obligation) -> None:
-        recipient.receive_message(obligation)
-        self.mailbox.add_to_obligation_outbox(obligation)
-
-    def receive_message(self, message: Union[Obligation, 'GoodMessage']) -> None:
-        self.mailbox.receive_message(message)
-
-    def print_mailbox(self) -> None:
-        self.mailbox.print_mailbox()
-
-    def get_obligation_inbox(self) -> List[Obligation]:
-        return self.mailbox.get_obligation_inbox()
-
-    def get_obligation_outbox(self) -> List[Obligation]:
-        return self.mailbox.get_obligation_outbox()
 
 
 class Action:
