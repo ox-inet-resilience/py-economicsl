@@ -8,7 +8,9 @@ from .contract import Contracts
 eps = 1e-10
 
 
-class Account:
+class Account(object):
+    __slots__ = 'name', 'account_type', 'balance'
+
     def __init__(self, name: str, account_type, starting_balance: np.longdouble=0.0) -> None:
         self.name = name
         self.account_type = account_type
@@ -63,7 +65,9 @@ AccountType = enum(ASSET=1,
 #
 # A simple economic agent will usually have a single Ledger, whereas complex firms and banks can have several books
 # (as in branch banking for example).
-class Ledger:
+class Ledger(object):
+    __slots__ = 'asset_accounts', 'inventory', 'contracts', 'goods_accounts', 'liability_accounts', 'me', 'initial_equity'
+
     def __init__(self, me) -> None:
         # A Ledger is a list of accounts (for quicker searching)
 
@@ -79,6 +83,7 @@ class Ledger:
         self.goods_accounts = {}
         self.liability_accounts = {}  # a hashmap from a contract to a liability_account
         self.me = me
+        self.initial_equity = 0
 
     def get_asset_value(self) -> np.longdouble:
         # return (sum([aa.get_balance() for aa in self.asset_accounts.values()]) +
