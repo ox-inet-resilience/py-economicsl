@@ -87,12 +87,12 @@ class Ledger(object):
 
     def get_asset_value(self) -> np.longdouble:
         # return (sum([aa.get_balance() for aa in self.asset_accounts.values()]) +
-        return (sum([a.get_value() for sublist in self.contracts.all_assets.values() for a in sublist]) +
+        return (sum(a.get_value() for sublist in self.contracts.all_assets.values() for a in sublist) +
                 self.inventory.get_cash())
 
     def get_liability_value(self) -> np.longdouble:
         # return sum([la.get_balance() for la in self.liability_accounts.values()])
-        return sum([l.get_value() for sublist in self.contracts.all_liabilities.values() for l in sublist])
+        return sum(l.get_value() for sublist in self.contracts.all_liabilities.values() for l in sublist)
 
     def get_equity_value(self) -> np.longdouble:
         return self.get_asset_value() - self.get_liability_value()
@@ -162,8 +162,7 @@ class Ledger(object):
 
     def create(self, name: str, amount, value) -> None:
         self.inventory.create(name, amount)
-        physicalthings_account = self.get_goods_account(name)
-        physicalthings_account.debit(amount * value)
+        self.get_goods_account(name).debit(amount * value)
 
     def destroy(self, name: str, amount, value=None) -> None:
         if value is None:
