@@ -19,7 +19,9 @@ class Contract:
         pass
 
 
-class Contracts:
+class Contracts(object):
+    __slots__ = 'all_assets', 'all_liabilities'
+
     def __init__(self):
         self.all_assets = defaultdict(list)
         self.all_liabilities = defaultdict(list)
