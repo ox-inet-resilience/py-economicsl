@@ -25,9 +25,12 @@ class Simulation:
         return self.time
 
 
-class Messenger:
+class Messenger(object):
+    __slots__ = 'mailbox', 'postbox'
+
     def __init__(self):
         self.mailbox = Mailbox(self)
+        self.postbox = None
 
     def send_obligation(self, recipient, obligation: Obligation) -> None:
         self.postbox.append((recipient, obligation))
@@ -47,6 +50,8 @@ class Messenger:
 
 
 class Agent(Messenger):
+    __slots__ = 'name', 'simulation', 'alive', 'main_ledger'
+
     def __init__(self, name: str, simulation: Simulation) -> None:
         super().__init__()
         self.name = name
@@ -137,7 +142,9 @@ class Trade(Agent):
         self.postbox.append((recipient, good_message))
 
 
-class Message:
+class Message(object):
+    __slots__ = 'sender', 'message', 'topic'
+
     def __init__(self, sender: Agent, topic: str, message) -> None:
         self.sender = sender
         self.message = message
@@ -153,14 +160,18 @@ class Message:
         return self.topic
 
 
-class GoodMessage:
+class GoodMessage(object):
+    __slots__ = 'good_name', 'amount', 'value'
+
     def __init__(self, good_name: str, amount: np.longdouble, value: np.longdouble) -> None:
         self.good_name = good_name
         self.amount = np.longdouble(amount)
         self.value = value
 
 
-class Mailbox:
+class Mailbox(object):
+    __slots__ = 'me', 'obligation_unopened', 'obligation_outbox', 'obligation_inbox'
+
     def __init__(self, me) -> None:
         self.me = me
         self.obligation_unopened = []
