@@ -88,7 +88,9 @@ class Agent(Messenger):
         self.mailbox.step()
 
 
-class Action:
+class Action(object):
+    __slots__ = 'me', 'amount'
+
     def __init__(self, me: Agent) -> None:
         self.me = me
         self.amount = np.longdouble(0.0)
