@@ -1,5 +1,6 @@
-import numpy as np
 from typing import Any, List
+
+import numpy as np
 
 from .abce import NotEnoughGoods, Inventory
 from .contract import Contracts
@@ -9,18 +10,20 @@ eps = 1e-10
 
 
 class Account(object):
-    __slots__ = 'name', 'account_type', 'balance'
+    __slots__ = 'name', 'account_type', 'balance', '_is_asset_or_expenses'
 
     def __init__(self, name: str, account_type, starting_balance: np.longdouble=0.0) -> None:
         self.name = name
         self.account_type = account_type
         self.balance = np.longdouble(starting_balance)
+        # PERF cache sign for faster debit/credit
+        self._is_asset_or_expenses = (account_type == AccountType.ASSET) or (account_type == AccountType.EXPENSES)
 
     def debit(self, amount: np.longdouble) -> None:
         """
         A Debit is a positive change for ASSET and EXPENSES accounts, and negative for the rest.
         """
-        if (self.account_type == AccountType.ASSET) or (self.account_type == AccountType.EXPENSES):
+        if self._is_asset_or_expenses:
             self.balance += amount
         else:
             self.balance -= amount
@@ -29,7 +32,7 @@ class Account(object):
         """
         A Credit is a negative change for ASSET and EXPENSES accounts, and positive for the rest.
         """
-        if ((self.account_type == AccountType.ASSET) or (self.account_type == AccountType.EXPENSES)):
+        if self._is_asset_or_expenses:
             self.balance -= amount
         else:
             self.balance += amount
