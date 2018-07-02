@@ -220,8 +220,9 @@ class Mailbox(object):
     def step(self) -> None:
         # Remove all fulfilled requests
         # and all requests in outbox from agents who have defaulted.
-        self.obligation_inbox = [o for o in self.obligation_inbox if not o.is_fulfilled()]
-        self.obligation_outbox = [o for o in self.obligation_outbox if (not o.is_fulfilled()) and o.get_from().is_alive()]
+        self.obligation_inbox = [o for o in self.obligation_inbox if not o.fulfilled]
+        # PERF o.from_.alive is faster than o.get_from().is_alive()
+        self.obligation_outbox = [o for o in self.obligation_outbox if (not o.fulfilled) and o.from_.alive]
 
         # Move all messages in the obligation_unopened to the obligation_inbox
         self.obligation_inbox += [o for o in self.obligation_unopened if o.has_arrived()]
