@@ -261,7 +261,7 @@ class Ledger(object):
         # for (Contract contract : get_liabilities_of_type(Repo.class)) {
         #    ((Repo) contract).printCollateral();
         # }
-        print("\n\nTotal cash:", self.get_goods_account("cash").get_balance())
+        print("\n\nTotal cash:", self.inventory.get_cash())
         # print("Encumbered cash:", me.getEncumberedCash())
         # print("Unencumbered cash: " + (me.getCash_() - me.getEncumberedCash()));
 
