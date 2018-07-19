@@ -1,5 +1,6 @@
 from typing import List, Union
 from collections import deque
+import logging
 import numpy as np
 
 from .accounting import Ledger
@@ -116,7 +117,7 @@ class Action(object):
         if actions:
             counter = 1
             for action in actions:
-                print("Action", counter, "->", action.get_name())
+                logging.debug("Action " + str(counter) + " -> " + action.get_name())
                 counter += 1
 
     def get_agent(self) -> Agent:
@@ -182,10 +183,10 @@ class Mailbox(object):
         if isinstance(message, Obligation):
             self.obligation_unopened.append(message)
 
-            print("Obligation received. ", message.get_from().get_name(),
-                  " must pay ", message.get_amount(), " to ",
-                  message.get_to().get_name(),
-                  " on timestep ", message.get_time_to_pay())
+            logging.debug("Obligation received. " + message.get_from().get_name() +
+                          " must pay " + str(message.get_amount()) + " to " +
+                          message.get_to().get_name() +
+                          " on timestep " + str(message.get_time_to_pay()))
         elif isinstance(message, GoodMessage):
             # Process goods
             print(message)
