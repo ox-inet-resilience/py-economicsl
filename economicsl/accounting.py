@@ -2,11 +2,8 @@ from typing import Any, List
 
 import numpy as np
 
-from .abce import NotEnoughGoods, Inventory
+from .abce import NotEnoughGoods, Inventory, eps
 from .contract import Contracts
-
-
-eps = 1e-10
 
 
 class Account(object):

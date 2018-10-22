@@ -2,7 +2,7 @@ from collections import defaultdict
 import numpy as np
 
 
-eps = 1e-10
+eps = 5e-9
 
 
 class NotEnoughGoods(Exception):
