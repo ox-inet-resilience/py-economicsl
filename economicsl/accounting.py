@@ -100,12 +100,12 @@ class Ledger(object):
     def get_asset_value_of(self, contract_type, contract_subtype=None) -> np.longdouble:
         # return asset_accounts.get(contractType).get_balance();
         if contract_subtype:
-            return sum([c.get_value() for c in self.contracts.all_assets[contract_type] if c.get_asset_type() == contract_subtype])
-        return sum([c.get_value() for c in self.contracts.all_assets[contract_type]])
+            return sum([c.get_value() for c in self.contracts.all_assets[contract_type.ctype] if c.get_asset_type() == contract_subtype])
+        return sum([c.get_value() for c in self.contracts.all_assets[contract_type.ctype]])
 
     def get_liability_value_of(self, contract_type) -> np.longdouble:
         # return liability_accounts.get(contractType).get_balance();
-        return sum([c.get_value() for c in self.contracts.all_liabilities[contract_type]])
+        return sum([c.get_value() for c in self.contracts.all_liabilities[contract_type.ctype]])
 
     def get_all_assets(self) -> List[Any]:
         return [asset for sublist in self.contracts.all_assets.values() for asset in sublist]
@@ -115,10 +115,10 @@ class Ledger(object):
                 for liability in sublist]
 
     def get_assets_of_type(self, contractType) -> List[Any]:
-        return self.contracts.all_assets[contractType]
+        return self.contracts.all_assets[contractType.ctype]
 
     def get_liabilities_of_type(self, contractType) -> List[Any]:
-        return self.contracts.all_liabilities[contractType]
+        return self.contracts.all_liabilities[contractType.ctype]
 
     def add_account(self, account, contract_type) -> None:
         switch = account.get_account_type()
@@ -142,7 +142,7 @@ class Ledger(object):
 
         asset_account.debit(contract.get_value())
 
-        self.contracts.all_assets[type(contract)].append(contract)
+        self.contracts.all_assets[contract.ctype].append(contract)
 
     # Adding a liability means debiting equity and crediting the account
     # relevant to that type of contract.
@@ -158,7 +158,7 @@ class Ledger(object):
         liability_account.credit(contract.get_value())
 
         # Add to the general inventory?
-        self.contracts.all_liabilities[type(contract)].append(contract)
+        self.contracts.all_liabilities[contract.ctype].append(contract)
 
     def create(self, name: str, amount, value) -> None:
         self.inventory.create(name, amount)

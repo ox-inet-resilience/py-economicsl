@@ -2,6 +2,8 @@ from collections import defaultdict
 
 
 class Contract:
+    __slots__ = 'assetParty', 'liabilityParty', 'ctype'
+
     """Base class for a model contract"""
     def get_asset_party(self):
         pass
