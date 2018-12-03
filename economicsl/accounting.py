@@ -86,12 +86,12 @@ class Ledger(object):
         self.initial_equity = 0
 
     def get_asset_value(self) -> np.longdouble:
-        # return (sum([aa.get_balance() for aa in self.asset_accounts.values()]) +
+        # return (sum(aa.get_balance() for aa in self.asset_accounts.values()) +
         return (sum(a.get_value() for sublist in self.contracts.all_assets.values() for a in sublist) +
                 self.inventory.get_cash())
 
     def get_liability_value(self) -> np.longdouble:
-        # return sum([la.get_balance() for la in self.liability_accounts.values()])
+        # return sum(la.get_balance() for la in self.liability_accounts.values())
         return sum(l.get_value() for sublist in self.contracts.all_liabilities.values() for l in sublist)
 
     def get_equity_value(self) -> np.longdouble:
@@ -100,19 +100,18 @@ class Ledger(object):
     def get_asset_value_of(self, contract_type, contract_subtype=None) -> np.longdouble:
         # return asset_accounts.get(contractType).get_balance();
         if contract_subtype:
-            return sum([c.get_value() for c in self.contracts.all_assets[contract_type.ctype] if c.get_asset_type() == contract_subtype])
-        return sum([c.get_value() for c in self.contracts.all_assets[contract_type.ctype]])
+            return sum(c.get_value() for c in self.contracts.all_assets[contract_type.ctype] if c.get_asset_type() == contract_subtype)
+        return sum(c.get_value() for c in self.contracts.all_assets[contract_type.ctype])
 
     def get_liability_value_of(self, contract_type) -> np.longdouble:
         # return liability_accounts.get(contractType).get_balance();
-        return sum([c.get_value() for c in self.contracts.all_liabilities[contract_type.ctype]])
+        return sum(c.get_value() for c in self.contracts.all_liabilities[contract_type.ctype])
 
     def get_all_assets(self) -> List[Any]:
         return [asset for sublist in self.contracts.all_assets.values() for asset in sublist]
 
     def get_all_liabilities(self) -> List[Any]:
-        return [liability for sublist in self.contracts.all_liabilities.values()
-                for liability in sublist]
+        return [lia for sublist in self.contracts.all_liabilities.values() for lia in sublist]
 
     def get_assets_of_type(self, contractType) -> List[Any]:
         return self.contracts.all_assets[contractType.ctype]
