@@ -9,12 +9,12 @@ from .contract import Contracts
 class Account(object):
     __slots__ = 'name', 'account_type', 'balance', '_is_asset_or_expenses'
 
-    def __init__(self, name: str, account_type, starting_balance: np.longdouble=0.0) -> None:
-        self.name = name
-        self.account_type = account_type
-        self.balance = np.longdouble(starting_balance)
+    def __init__(self, name: str, account_type: int, starting_balance: np.longdouble=0.0) -> None:
+        self.name: str = name
+        self.account_type: int = account_type
+        self.balance= np.longdouble(starting_balance)
         # PERF cache sign for faster debit/credit
-        self._is_asset_or_expenses = (account_type == AccountType.ASSET) or (account_type == AccountType.EXPENSES)
+        self._is_asset_or_expenses: bool = (account_type == AccountType.ASSET) or (account_type == AccountType.EXPENSES)
 
     def debit(self, amount: np.longdouble) -> None:
         """
@@ -34,7 +34,7 @@ class Account(object):
         else:
             self.balance += amount
 
-    def get_account_type(self):
+    def get_account_type(self) -> int:
         return self.account_type
 
     def get_balance(self) -> np.longdouble:
