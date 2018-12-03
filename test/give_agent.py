@@ -5,7 +5,7 @@ class GiveAgent(economicsl.Trade):
     def __init__(self, name, teddies, money, simulation):
         super().__init__(name, simulation)
         self.add_cash(money)
-        self.get_main_ledger().create("teddies", teddies, 100.0)
+        self.get_ledger().create("teddies", teddies, 100.0)
 
     def give(self, receiver):
         try:

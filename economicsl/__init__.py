@@ -87,7 +87,7 @@ class Agent(Messenger):
     def get_cash_(self) -> np.longdouble:
         return self.main_ledger.inventory.get_cash()
 
-    def get_main_ledger(self) -> Ledger:
+    def get_ledger(self) -> Ledger:
         return self.main_ledger
 
     def step(self) -> None:
@@ -137,8 +137,8 @@ class Trade(Agent):
         raise NotImplementedError
 
     def give(self, recipient: Agent, good_name: str, amount_give: np.longdouble) -> None:
-        value = self.get_main_ledger().get_physical_thing_value(good_name)
-        self.get_main_ledger().destroy(good_name, amount_give)
+        value = self.get_ledger().get_physical_thing_value(good_name)
+        self.get_ledger().destroy(good_name, amount_give)
         good_message = GoodMessage(good_name, amount_give, value)
         self.postbox.append((recipient, good_message))
 
@@ -190,7 +190,7 @@ class Mailbox(object):
         elif isinstance(message, GoodMessage):
             # Process goods
             print(message)
-            self.me.get_main_ledger().create(message.good_name, message.amount, message.value)
+            self.me.get_ledger().create(message.good_name, message.amount, message.value)
         else:
             # Process cash
             self.me.add_cash(message)

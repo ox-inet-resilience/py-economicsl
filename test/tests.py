@@ -12,7 +12,7 @@ class End2EndTest(unittest.TestCase):
     def test_give(self):
         simulation = economicsl.Simulation()
         giveandreceives = [GiveAgent(str(i), 1, 0, simulation) for i in range(NUM_AGENTS)]
-        giveandreceives[0].get_main_ledger().create("ball", 2, 5.5)
+        giveandreceives[0].get_ledger().create("ball", 2, 5.5)
         print(giveandreceives[0])
 
         for time in range(ROUNDS):
@@ -20,7 +20,7 @@ class End2EndTest(unittest.TestCase):
             print("Time step:", time)
             print("^^^^^^^^^^^^^")
             for i in range(NUM_AGENTS):
-                quantity = giveandreceives[i].get_main_ledger().inventory.get_good("ball")
+                quantity = giveandreceives[i].get_ledger().inventory.get_good("ball")
                 if quantity > 0.9:
                     print("%d has ball %d" % (i, quantity))
                 if i + 1 < NUM_AGENTS:
