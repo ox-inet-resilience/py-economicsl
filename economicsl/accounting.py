@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Dict
 
 import numpy as np
 
@@ -12,7 +12,7 @@ class Account(object):
     def __init__(self, name: str, account_type: int, starting_balance: np.longdouble=0.0) -> None:
         self.name: str = name
         self.account_type: int = account_type
-        self.balance= np.longdouble(starting_balance)
+        self.balance = np.longdouble(starting_balance)
         # PERF cache sign for faster debit/credit
         self._is_asset_or_expenses: bool = (account_type == AccountType.ASSET) or (account_type == AccountType.EXPENSES)
 
@@ -77,11 +77,11 @@ class Ledger(object):
         # type (such as Loan) can sometimes be an asset and sometimes a liability.
 
         # A book is initially created with a cash account (it's the simplest possible book)
-        self.asset_accounts = {}  # a hashmap from a contract to an asset_account
+        self.asset_accounts: Dict[Any] = {}  # a hashmap from a contract to an asset_account
         self.inventory = Inventory()
         self.contracts = Contracts()
-        self.goods_accounts = {}
-        self.liability_accounts = {}  # a hashmap from a contract to a liability_account
+        self.goods_accounts: Dict[Any] = {}
+        self.liability_accounts: Dict[Any] = {}  # a hashmap from a contract to a liability_account
         self.me = me
         self.initial_equity = 0
 
@@ -220,7 +220,7 @@ class Ledger(object):
 
     # If I've sold an asset, debit cash and credit asset
     # @param amount the *value* of the asset
-    def sell_asset(self, amount, assetType) -> None:
+    def sell_asset(self, amount: np.longdouble, assetType) -> None:
         asset_account = self.asset_accounts.get(assetType)
 
         # (dr cash, cr asset)
@@ -254,11 +254,10 @@ class Ledger(object):
         print("\nTOTAL EQUITY: %.2f" % self.get_equity_value())
 
         print("\nSummary of encumbered collateral:")
-        # for (Contract contract : get_liabilities_of_type(Repo.class)) {
-        #    ((Repo) contract).printCollateral();
-        # }
+        # for repo in self.get_liabilities_of_type(Repo):
+        #     repo.print_collateral()
         print("\n\nTotal cash:", self.inventory.get_cash())
-        # print("Encumbered cash:", me.getEncumberedCash())
+        # print("Encumbered cash:", self.get_encumbered_cash())
         # print("Unencumbered cash: " + (me.getCash_() - me.getEncumberedCash()));
 
     def get_initial_equity(self) -> np.longdouble:
@@ -273,7 +272,7 @@ class Ledger(object):
     def get_cash_account(self) -> Account:
         return self.get_goods_account("cash")
 
-    def devalue_asset(self, asset, valueLost) -> None:
+    def devalue_asset(self, asset, valueLost: np.longdouble) -> None:
         """
         if an Asset loses value, I must credit asset
         @param valueLost the value lost
@@ -282,15 +281,15 @@ class Ledger(object):
 
         # TODO: perform a check here that the Asset account balances match the value of the assets. (?)
 
-    def appreciate_asset(self, asset, valueLost) -> None:
+    def appreciate_asset(self, asset, valueLost: np.longdouble) -> None:
         self.asset_accounts.get(asset).debit(valueLost)
 
-    def devalue_liability(self, liability, valueLost) -> None:
+    def devalue_liability(self, liability, valueLost: np.longdouble) -> None:
         self.liability_accounts.get(liability).debit(valueLost)
 
     def appreciate_liability(self, liability, valueLost) -> None:
         self.liability_accounts.get(liability).credit(valueLost)
 
-    def book(self, debit_account, credit_account, amount: np.longdouble):
+    def book(self, debit_account: Account, credit_account: Account, amount: np.longdouble):
         debit_account.debit(amount)
         credit_account.credit(amount)

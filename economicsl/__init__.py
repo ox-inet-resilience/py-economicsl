@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Deque, Any
 from collections import deque
 import logging
 import numpy as np
@@ -12,7 +12,7 @@ from .abce import NotEnoughGoods  # NOQA
 class Simulation:
     def __init__(self) -> None:
         self.time = 0
-        self.postbox = deque()
+        self.postbox: Deque[Any] = deque()
 
     def advance_time(self) -> None:
         self.time += 1
@@ -57,7 +57,7 @@ class Agent(Messenger):
         super().__init__()
         self.name = name
         self.simulation = simulation
-        self.postbox = simulation.postbox
+        self.postbox: Deque[Any] = simulation.postbox
         self.alive = True
         self.main_ledger = Ledger(self)
 
@@ -175,9 +175,9 @@ class Mailbox(object):
 
     def __init__(self, me) -> None:
         self.me = me
-        self.obligation_unopened = []
-        self.obligation_outbox = []
-        self.obligation_inbox = []
+        self.obligation_unopened: List[Any] = []
+        self.obligation_outbox: List[Any] = []
+        self.obligation_inbox: List[Any] = []
 
     def receive_message(self, message) -> None:
         if isinstance(message, Obligation):
