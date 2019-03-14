@@ -2,7 +2,7 @@ from collections import defaultdict
 
 
 class Contract(object):
-    __slots__ = 'assetParty', 'liabilityParty', 'ctype'
+    __slots__ = 'assetParty', 'liabilityParty'
     """Base class for a model contract"""
     ctype = 'Contract'
 
