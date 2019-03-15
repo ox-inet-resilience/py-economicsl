@@ -220,8 +220,11 @@ class Mailbox(object):
                 o.fulfil()
 
     def step(self) -> None:
-        # Remove all fulfilled requests
-        # and all requests in outbox from agents who have defaulted.
+        """
+        - Remove all fulfilled requests from the inbox and outbox.
+        - Remove all pending outgoing requests to institutions who have defaulted in the previous round.
+        - Move all messages from unread mailbox to inbox, i.e. "mark as read".
+        """
         self.obligation_inbox = [o for o in self.obligation_inbox if not o.fulfilled]
         # PERF o.from_.alive is faster than o.get_from().is_alive()
         self.obligation_outbox = [o for o in self.obligation_outbox if (not o.fulfilled) and o.from_.alive]
