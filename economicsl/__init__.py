@@ -92,7 +92,8 @@ class Agent(Messenger):
         return self.main_ledger
 
     def step(self) -> None:
-        self.mailbox.step()
+        if self.is_alive():
+            self.mailbox.step()
 
 
 class Action(object):
