@@ -38,6 +38,9 @@ class Messenger(object):
         self.postbox.append((recipient, obligation))
         self.mailbox.add_to_obligation_outbox(obligation)
 
+    def send_cash(self, recipient, amount) -> None:
+        self.postbox.append((recipient, amount))
+
     def receive_message(self, message: Union[Obligation, 'GoodMessage']) -> None:
         self.mailbox.receive_message(message)
 
