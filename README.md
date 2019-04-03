@@ -1,7 +1,7 @@
 # python-distilledESL
 
 [![DOI](https://zenodo.org/badge/95235014.svg)](https://zenodo.org/badge/latestdoi/95235014)
-[![Build Status](https://travis-ci.org/rht/py-distilledESL.svg?branch=master)](https://travis-ci.org/rht/py-distilledESL)
+[![Build Status](https://travis-ci.org/ox-inet-resilience/py-economicsl.svg?branch=master)](https://travis-ci.org/ox-inet-resilience/py-economicsl)
 
 This is a python port of the entirety of
 https://github.com/EconomicSL/distilledESL, further trimmed to its essence.
@@ -22,7 +22,7 @@ This library uses Python >=3.5 type system, so it runs only on python>=3.5.
 
 To install, run
 ```
-$ pip install git+https://github.com/rht/py-distilledESL
+$ pip install git+https://github.com/ox-inet-resilience/py-economicsl
 ```
 
 or from this repo
