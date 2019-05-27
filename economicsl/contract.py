@@ -16,7 +16,7 @@ class Contract(object):
     def get_liability_party(self):
         return self.liabilityParty
 
-    def get_value(self, me):
+    def get_valuation(self, me):
         pass
 
     def get_action(self, me):

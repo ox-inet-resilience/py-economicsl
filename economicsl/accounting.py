@@ -9,7 +9,7 @@ from .contract import Contracts
 class Account(object):
     __slots__ = 'name', 'account_type', 'balance', '_is_asset_or_expenses'
 
-    def __init__(self, name: str, account_type: int, starting_balance: np.longdouble=0.0) -> None:
+    def __init__(self, name: str, account_type: int, starting_balance: np.longdouble = 0.0) -> None:
         self.name: str = name
         self.account_type: int = account_type
         self.balance = np.longdouble(starting_balance)
@@ -85,27 +85,27 @@ class Ledger(object):
         self.me = me
         self.initial_equity = 0
 
-    def get_asset_value(self) -> np.longdouble:
+    def get_asset_valuation(self) -> np.longdouble:
         # return (sum(aa.get_balance() for aa in self.asset_accounts.values()) +
-        return (sum(a.get_value() for sublist in self.contracts.all_assets.values() for a in sublist) +
+        return (sum(a.get_valuation() for sublist in self.contracts.all_assets.values() for a in sublist) +
                 self.inventory.get_cash())
 
-    def get_liability_value(self) -> np.longdouble:
+    def get_liability_valuation(self) -> np.longdouble:
         # return sum(la.get_balance() for la in self.liability_accounts.values())
-        return sum(l.get_value() for sublist in self.contracts.all_liabilities.values() for l in sublist)
+        return sum(l.get_valuation() for sublist in self.contracts.all_liabilities.values() for l in sublist)
 
-    def get_equity_value(self) -> np.longdouble:
-        return self.get_asset_value() - self.get_liability_value()
+    def get_equity_valuation(self) -> np.longdouble:
+        return self.get_asset_valuation() - self.get_liability_valuation()
 
-    def get_asset_value_of(self, contract_type, contract_subtype=None) -> np.longdouble:
+    def get_asset_valuation_of(self, contract_type, contract_subtype=None) -> np.longdouble:
         # return asset_accounts.get(contractType).get_balance();
         if contract_subtype:
-            return sum(c.get_value() for c in self.contracts.all_assets[contract_type.ctype] if c.get_asset_type() == contract_subtype)
-        return sum(c.get_value() for c in self.contracts.all_assets[contract_type.ctype])
+            return sum(c.get_valuation() for c in self.contracts.all_assets[contract_type.ctype] if c.get_asset_type() == contract_subtype)
+        return sum(c.get_valuation() for c in self.contracts.all_assets[contract_type.ctype])
 
-    def get_liability_value_of(self, contract_type) -> np.longdouble:
+    def get_liability_valuation_of(self, contract_type) -> np.longdouble:
         # return liability_accounts.get(contractType).get_balance();
-        return sum(c.get_value() for c in self.contracts.all_liabilities[contract_type.ctype])
+        return sum(c.get_valuation() for c in self.contracts.all_liabilities[contract_type.ctype])
 
     def get_all_assets(self) -> List[Any]:
         return [asset for sublist in self.contracts.all_assets.values() for asset in sublist]
@@ -139,7 +139,7 @@ class Ledger(object):
             asset_account = Account(contract.get_name(self.me), AccountType.ASSET)
             self.add_account(asset_account, contract)
 
-        asset_account.debit(contract.get_value())
+        asset_account.debit(contract.get_valuation())
 
         self.contracts.all_assets[contract.ctype].append(contract)
 
@@ -154,25 +154,25 @@ class Ledger(object):
             liability_account = Account(contract.get_name(self.me), AccountType.LIABILITY)
             self.add_account(liability_account, contract)
 
-        liability_account.credit(contract.get_value())
+        liability_account.credit(contract.get_valuation())
 
         # Add to the general inventory?
         self.contracts.all_liabilities[contract.ctype].append(contract)
 
-    def create(self, name: str, amount, value) -> None:
+    def create(self, name: str, amount, valuation) -> None:
         self.inventory.create(name, amount)
-        self.get_goods_account(name).debit(amount * value)
+        self.get_goods_account(name).debit(amount * valuation)
 
-    def destroy(self, name: str, amount, value=None) -> None:
-        if value is None:
+    def destroy(self, name: str, amount, valuation=None) -> None:
+        if valuation is None:
             try:
-                value = self.get_physical_thing_value(name)
-                self.destroy(name, amount, value)
+                valuation = self.get_physical_thing_valuation(name)
+                self.destroy(name, amount, valuation)
             except Exception:
                 raise NotEnoughGoods(name, 0, amount)
         else:
             self.inventory.destroy(name, amount)
-            self.get_goods_account(name).credit(amount * value)
+            self.get_goods_account(name).credit(amount * valuation)
 
     def get_goods_account(self, name: str) -> Account:
         account = self.goods_accounts.get(name)
@@ -181,23 +181,23 @@ class Ledger(object):
             self.goods_accounts[name] = account
         return account
 
-    def get_physical_thing_value(self, name: str) -> np.longdouble:
+    def get_physical_thing_valuation(self, name: str) -> np.longdouble:
         try:
             return self.get_goods_account(name).get_balance() / self.inventory.get_good(name)
         except Exception:
             return 0.0
 
-    def revalue_goods(self, name, value) -> None:
+    def revalue_goods(self, name, valuation) -> None:
         """
-        Reevaluate the current stock of physical goods at a specified value and book
+        Reevaluate the current stock of physical goods at a specified valuation and book
         the change to GoodsAccount.
         """
-        old_value = self.get_goods_account(name).get_balance()
-        new_value = self.inventory.get_good(name) * value
-        if new_value > old_value:
-            self.get_goods_account(name).debit(new_value - old_value)
-        elif new_value < old_value:
-            self.get_goods_account(name).credit(old_value - new_value)
+        old_valuation = self.get_goods_account(name).get_balance()
+        new_valuation = self.inventory.get_good(name) * valuation
+        if new_valuation > old_valuation:
+            self.get_goods_account(name).debit(new_valuation - old_valuation)
+        elif new_valuation < old_valuation:
+            self.get_goods_account(name).credit(old_valuation - new_valuation)
 
     def add_cash(self, amount: np.longdouble) -> None:
         # (dr cash, cr equity)
@@ -219,7 +219,7 @@ class Ledger(object):
         self.book(liability_account, self.get_goods_account("cash"), amount)
 
     # If I've sold an asset, debit cash and credit asset
-    # @param amount the *value* of the asset
+    # @param amount the *valuation* of the asset
     def sell_asset(self, amount: np.longdouble, assetType) -> None:
         asset_account = self.asset_accounts.get(assetType)
 
@@ -242,16 +242,16 @@ class Ledger(object):
 
         print("Breakdown: ")
         for c in self.get_all_assets():
-            print("\t", c.get_name(me), " > ", c.get_value())
-        print("TOTAL ASSETS: %.2f" % self.get_asset_value())
+            print("\t", c.get_name(me), " > ", c.get_valuation())
+        print("TOTAL ASSETS: %.2f" % self.get_asset_valuation())
 
         print("\nLiability accounts:\n---------------")
         for a in self.liability_accounts.values():
             print(a.get_name(), " -> %.2f" % a.get_balance())
         for c in self.get_all_liabilities():
-            print("\t", c.get_name(me), " > ", c.get_value())
-        print("TOTAL LIABILITIES: %.2f" % self.get_liability_value())
-        print("\nTOTAL EQUITY: %.2f" % self.get_equity_value())
+            print("\t", c.get_name(me), " > ", c.get_valuation())
+        print("TOTAL LIABILITIES: %.2f" % self.get_liability_valuation())
+        print("\nTOTAL EQUITY: %.2f" % self.get_equity_valuation())
 
         print("\nSummary of encumbered collateral:")
         # for repo in self.get_liabilities_of_type(Repo):
@@ -263,8 +263,8 @@ class Ledger(object):
     def get_initial_equity(self) -> np.longdouble:
         return self.initial_equity
 
-    def set_initial_values(self) -> None:
-        self.initial_equity = self.get_equity_value()
+    def set_initial_valuations(self) -> None:
+        self.initial_equity = self.get_equity_valuation()
 
     def get_account_from_contract(self, contract):
         return self.asset_accounts.get(contract)
@@ -272,23 +272,23 @@ class Ledger(object):
     def get_cash_account(self) -> Account:
         return self.get_goods_account("cash")
 
-    def devalue_asset(self, asset, valueLost: np.longdouble) -> None:
+    def devalue_asset(self, asset, valuationLost: np.longdouble) -> None:
         """
-        if an Asset loses value, I must credit asset
-        @param valueLost the value lost
+        if an Asset loses valuation, I must credit asset
+        @param valuationLost the valuation lost
         """
-        self.asset_accounts.get(asset).credit(valueLost)
+        self.asset_accounts.get(asset).credit(valuationLost)
 
-        # TODO: perform a check here that the Asset account balances match the value of the assets. (?)
+        # TODO: perform a check here that the Asset account balances match the valuation of the assets. (?)
 
-    def appreciate_asset(self, asset, valueLost: np.longdouble) -> None:
-        self.asset_accounts.get(asset).debit(valueLost)
+    def appreciate_asset(self, asset, valuationLost: np.longdouble) -> None:
+        self.asset_accounts.get(asset).debit(valuationLost)
 
-    def devalue_liability(self, liability, valueLost: np.longdouble) -> None:
-        self.liability_accounts.get(liability).debit(valueLost)
+    def devalue_liability(self, liability, valuationLost: np.longdouble) -> None:
+        self.liability_accounts.get(liability).debit(valuationLost)
 
-    def appreciate_liability(self, liability, valueLost) -> None:
-        self.liability_accounts.get(liability).credit(valueLost)
+    def appreciate_liability(self, liability, valuationLost) -> None:
+        self.liability_accounts.get(liability).credit(valuationLost)
 
     def book(self, debit_account: Account, credit_account: Account, amount: np.longdouble):
         debit_account.debit(amount)

@@ -137,14 +137,14 @@ class Trade(Agent):
         super().__init__(name, simulation)
 
     # Trade good one against good two
-    def barter(self, trade_partner, name_get, amount_get, value_get, name_give,
-               amount_give, value_give) -> None:
+    def barter(self, trade_partner, name_get, amount_get, valuation_get, name_give,
+               amount_give, valuation_give) -> None:
         raise NotImplementedError
 
     def give(self, recipient: Agent, good_name: str, amount_give: np.longdouble) -> None:
-        value = self.get_ledger().get_physical_thing_value(good_name)
+        valuation = self.get_ledger().get_physical_thing_valuation(good_name)
         self.get_ledger().destroy(good_name, amount_give)
-        good_message = GoodMessage(good_name, amount_give, value)
+        good_message = GoodMessage(good_name, amount_give, valuation)
         self.postbox.append((recipient, good_message))
 
 
@@ -167,12 +167,12 @@ class Message(object):
 
 
 class GoodMessage(object):
-    __slots__ = 'good_name', 'amount', 'value'
+    __slots__ = 'good_name', 'amount', 'valuation'
 
-    def __init__(self, good_name: str, amount: np.longdouble, value: np.longdouble) -> None:
+    def __init__(self, good_name: str, amount: np.longdouble, valuation: np.longdouble) -> None:
         self.good_name = good_name
         self.amount = np.longdouble(amount)
-        self.value = value
+        self.valuation = valuation
 
 
 class Mailbox(object):
@@ -195,7 +195,7 @@ class Mailbox(object):
         elif isinstance(message, GoodMessage):
             # Process goods
             print(message)
-            self.me.get_ledger().create(message.good_name, message.amount, message.value)
+            self.me.get_ledger().create(message.good_name, message.amount, message.valuation)
         else:
             # Process cash
             self.me.add_cash(message)
@@ -267,14 +267,14 @@ class Mailbox(object):
 
 
 class BankersRounding:
-    def do_bankers_rounding(self, value: np.longdouble) -> int:
-        s = int(value)
-        t = abs(value - s)
+    def do_bankers_rounding(self, valuation: np.longdouble) -> int:
+        s = int(valuation)
+        t = abs(valuation - s)
 
         if ((t < 0.5) or (t == 0.5 and s % 2 == 0)):
             return s
         else:
-            if (value < 0):
+            if (valuation < 0):
                 return s - 1
             else:
                 return s + 1
