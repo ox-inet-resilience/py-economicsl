@@ -87,12 +87,12 @@ class Ledger(object):
 
     def get_asset_valuation(self) -> np.longdouble:
         # return (sum(aa.get_balance() for aa in self.asset_accounts.values()) +
-        return (sum(a.get_valuation() for sublist in self.contracts.all_assets.values() for a in sublist) +
+        return (sum(a.get_valuation('A') for sublist in self.contracts.all_assets.values() for a in sublist) +
                 self.inventory.get_cash())
 
     def get_liability_valuation(self) -> np.longdouble:
         # return sum(la.get_balance() for la in self.liability_accounts.values())
-        return sum(l.get_valuation() for sublist in self.contracts.all_liabilities.values() for l in sublist)
+        return sum(l.get_valuation('L') for sublist in self.contracts.all_liabilities.values() for l in sublist)
 
     def get_equity_valuation(self) -> np.longdouble:
         return self.get_asset_valuation() - self.get_liability_valuation()
@@ -100,12 +100,12 @@ class Ledger(object):
     def get_asset_valuation_of(self, contract_type, contract_subtype=None) -> np.longdouble:
         # return asset_accounts.get(contractType).get_balance();
         if contract_subtype:
-            return sum(c.get_valuation() for c in self.contracts.all_assets[contract_type.ctype] if c.get_asset_type() == contract_subtype)
-        return sum(c.get_valuation() for c in self.contracts.all_assets[contract_type.ctype])
+            return sum(c.get_valuation('A') for c in self.contracts.all_assets[contract_type.ctype] if c.get_asset_type() == contract_subtype)
+        return sum(c.get_valuation('A') for c in self.contracts.all_assets[contract_type.ctype])
 
     def get_liability_valuation_of(self, contract_type) -> np.longdouble:
         # return liability_accounts.get(contractType).get_balance();
-        return sum(c.get_valuation() for c in self.contracts.all_liabilities[contract_type.ctype])
+        return sum(c.get_valuation('L') for c in self.contracts.all_liabilities[contract_type.ctype])
 
     def get_all_assets(self) -> List[Any]:
         return [asset for sublist in self.contracts.all_assets.values() for asset in sublist]
@@ -139,7 +139,7 @@ class Ledger(object):
             asset_account = Account(contract.get_name(self.me), AccountType.ASSET)
             self.add_account(asset_account, contract)
 
-        asset_account.debit(contract.get_valuation())
+        asset_account.debit(contract.get_valuation('A'))
 
         self.contracts.all_assets[contract.ctype].append(contract)
 
@@ -154,7 +154,7 @@ class Ledger(object):
             liability_account = Account(contract.get_name(self.me), AccountType.LIABILITY)
             self.add_account(liability_account, contract)
 
-        liability_account.credit(contract.get_valuation())
+        liability_account.credit(contract.get_valuation('L'))
 
         # Add to the general inventory?
         self.contracts.all_liabilities[contract.ctype].append(contract)
@@ -242,14 +242,14 @@ class Ledger(object):
 
         print("Breakdown: ")
         for c in self.get_all_assets():
-            print("\t", c.get_name(me), " > ", c.get_valuation())
+            print("\t", c.get_name(me), " > ", c.get_valuation('A'))
         print("TOTAL ASSETS: %.2f" % self.get_asset_valuation())
 
         print("\nLiability accounts:\n---------------")
         for a in self.liability_accounts.values():
             print(a.get_name(), " -> %.2f" % a.get_balance())
         for c in self.get_all_liabilities():
-            print("\t", c.get_name(me), " > ", c.get_valuation())
+            print("\t", c.get_name(me), " > ", c.get_valuation('L'))
         print("TOTAL LIABILITIES: %.2f" % self.get_liability_valuation())
         print("\nTOTAL EQUITY: %.2f" % self.get_equity_valuation())
 
