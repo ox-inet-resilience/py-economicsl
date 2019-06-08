@@ -3,7 +3,7 @@ from collections import deque
 import logging
 import numpy as np
 
-from .accounting import Ledger
+from .accounting import FastLedger
 from .obligations import Obligation
 from .accounting import AccountType  # NOQA
 from .abce import NotEnoughGoods  # NOQA
@@ -63,7 +63,7 @@ class Agent(Messenger):
         self.simulation = simulation
         self.postbox: Deque[Any] = simulation.postbox
         self.alive = True
-        self.main_ledger = Ledger()
+        self.main_ledger = FastLedger()
 
     def add(self, contract) -> None:
         if (contract.get_asset_party() == self):
@@ -89,9 +89,13 @@ class Agent(Messenger):
         self.main_ledger.add_cash(amount)
 
     def get_cash_(self) -> np.longdouble:
-        return self.main_ledger.inventory.get_cash()
+        # the FastLedger version is intentionally used here
+        # because wrapping cash with get_cash() in Ledger would only add
+        # another extra method call
+        # If ledger becomes the default again, make sure to revert this back
+        return self.main_ledger.cash
 
-    def get_ledger(self) -> Ledger:
+    def get_ledger(self) -> FastLedger:
         return self.main_ledger
 
     def step(self) -> None:

@@ -55,55 +55,29 @@ AccountType = enum(ASSET=1,
                    GOOD=6)
 
 
-# This is the main class implementing double entry org.economicsl.accounting. All public operations provided by this class
-# are performed as a double entry operation, i.e. a pair of (dr, cr) operations.
-#
-# A Ledger contains a set of accounts, and is the interface between an agent and its accounts. Agents cannot
-# directly interact with accounts other than via a Ledger.
-#
-# At the moment, a Ledger contains an account for each type of contract, plus an equity account and a cash account.
-#
-# A simple economic agent will usually have a single Ledger, whereas complex firms and banks can have several books
-# (as in branch banking for example).
-class Ledger(object):
-    __slots__ = 'asset_accounts', 'inventory', 'contracts', 'goods_accounts', 'liability_accounts', 'initial_equity'
+class FastLedger(object):
+    __slots__ = 'cash', 'contracts', 'initial_equity'
 
-    def __init__(self) -> None:
-        # A Ledger is a list of accounts (for quicker searching)
-
-        # Each Account includes an inventory to hold one type of contract.
-        # These hashmaps are used to access the correct account for a given type of contract.
-        # Note that separate hashmaps are needed for asset accounts and liability accounts: the same contract
-        # type (such as Loan) can sometimes be an asset and sometimes a liability.
-
-        # A book is initially created with a cash account (it's the simplest possible book)
-        self.asset_accounts: Dict[Any] = {}  # a hashmap from a contract to an asset_account
-        self.inventory = Inventory()
+    def __init__(self):
+        self.cash = 0.0
         self.contracts = Contracts()
-        self.goods_accounts: Dict[Any] = {}
-        self.liability_accounts: Dict[Any] = {}  # a hashmap from a contract to a liability_account
-        self.initial_equity = 0
+        self.initial_equity = 0.0
 
     def get_asset_valuation(self) -> np.longdouble:
-        # return (sum(aa.get_balance() for aa in self.asset_accounts.values()) +
-        return (sum(a.get_valuation('A') for sublist in self.contracts.all_assets.values() for a in sublist) +
-                self.inventory.get_cash())
+        return sum(a.get_valuation('A') for sublist in self.contracts.all_assets.values() for a in sublist) + self.cash
 
     def get_liability_valuation(self) -> np.longdouble:
-        # return sum(la.get_balance() for la in self.liability_accounts.values())
         return sum(l.get_valuation('L') for sublist in self.contracts.all_liabilities.values() for l in sublist)
 
     def get_equity_valuation(self) -> np.longdouble:
         return self.get_asset_valuation() - self.get_liability_valuation()
 
     def get_asset_valuation_of(self, contract_type, contract_subtype=None) -> np.longdouble:
-        # return asset_accounts.get(contractType).get_balance();
         if contract_subtype:
             return sum(c.get_valuation('A') for c in self.contracts.all_assets[contract_type.ctype] if c.get_asset_type() == contract_subtype)
         return sum(c.get_valuation('A') for c in self.contracts.all_assets[contract_type.ctype])
 
     def get_liability_valuation_of(self, contract_type) -> np.longdouble:
-        # return liability_accounts.get(contractType).get_balance();
         return sum(c.get_valuation('L') for c in self.contracts.all_liabilities[contract_type.ctype])
 
     def get_all_assets(self) -> List[Any]:
@@ -117,6 +91,78 @@ class Ledger(object):
 
     def get_liabilities_of_type(self, contractType) -> List[Any]:
         return self.contracts.all_liabilities[contractType.ctype]
+
+    def add_asset(self, contract) -> None:
+        self.contracts.all_assets[contract.ctype].append(contract)
+
+    def add_liability(self, contract) -> None:
+        self.contracts.all_liabilities[contract.ctype].append(contract)
+
+    # where things deviate from Ledger
+    def add_cash(self, amount: np.longdouble) -> None:
+        self.cash += np.longdouble(amount)
+
+    def subtract_cash(self, amount: np.longdouble) -> None:
+        self.cash -= np.longdouble(amount)
+
+    def pay_liability(self, amount, loan) -> None:
+        pass
+
+    def sell_asset(self, amount: np.longdouble, assetType) -> None:
+        pass
+
+    def pull_funding(self, amount, loan) -> None:
+        pass
+
+    def get_initial_equity(self) -> np.longdouble:
+        return self.initial_equity
+
+    def set_initial_valuations(self) -> None:
+        self.initial_equity = self.get_equity_valuation()
+
+    def devalue_asset(self, asset, valuationLost: np.longdouble) -> None:
+        pass
+
+    def appreciate_asset(self, asset, valuationLost: np.longdouble) -> None:
+        pass
+
+    def devalue_liability(self, liability, valuationLost: np.longdouble) -> None:
+        pass
+
+    def appreciate_liability(self, liability, valuationLost) -> None:
+        pass
+
+
+# This is the main class implementing double entry org.economicsl.accounting. All public operations provided by this class
+# are performed as a double entry operation, i.e. a pair of (dr, cr) operations.
+#
+# A Ledger contains a set of accounts, and is the interface between an agent and its accounts. Agents cannot
+# directly interact with accounts other than via a Ledger.
+#
+# At the moment, a Ledger contains an account for each type of contract, plus an equity account and a cash account.
+#
+# A simple economic agent will usually have a single Ledger, whereas complex firms and banks can have several books
+# (as in branch banking for example).
+class Ledger(FastLedger):
+    __slots__ = 'asset_accounts', 'inventory', 'goods_accounts', 'liability_accounts'
+
+    def __init__(self) -> None:
+        # A Ledger is a list of accounts (for quicker searching)
+
+        # Each Account includes an inventory to hold one type of contract.
+        # These hashmaps are used to access the correct account for a given type of contract.
+        # Note that separate hashmaps are needed for asset accounts and liability accounts: the same contract
+        # type (such as Loan) can sometimes be an asset and sometimes a liability.
+
+        # A book is initially created with a cash account (it's the simplest possible book)
+        super().__init__()
+        self.asset_accounts: Dict[Any] = {}  # a hashmap from a contract to an asset_account
+        self.inventory = Inventory()
+        self.goods_accounts: Dict[Any] = {}
+        self.liability_accounts: Dict[Any] = {}  # a hashmap from a contract to a liability_account
+
+    def get_asset_valuation(self) -> np.longdouble:
+        return (sum(a.get_valuation('A') for sublist in self.contracts.all_assets.values() for a in sublist) + self.inventory.get_cash())
 
     def add_account(self, account, contract_type) -> None:
         switch = account.get_account_type()
