@@ -23,7 +23,7 @@ class Contract(object):
     def get_action(self, me):
         pass
 
-    def get_name(self, me):
+    def get_name(self):
         pass
 
     def is_eligible(self, me):

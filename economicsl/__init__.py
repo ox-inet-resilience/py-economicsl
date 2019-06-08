@@ -63,7 +63,7 @@ class Agent(Messenger):
         self.simulation = simulation
         self.postbox: Deque[Any] = simulation.postbox
         self.alive = True
-        self.main_ledger = Ledger(self)
+        self.main_ledger = Ledger()
 
     def add(self, contract) -> None:
         if (contract.get_asset_party() == self):

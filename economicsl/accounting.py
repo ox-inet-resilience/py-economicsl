@@ -66,9 +66,9 @@ AccountType = enum(ASSET=1,
 # A simple economic agent will usually have a single Ledger, whereas complex firms and banks can have several books
 # (as in branch banking for example).
 class Ledger(object):
-    __slots__ = 'asset_accounts', 'inventory', 'contracts', 'goods_accounts', 'liability_accounts', 'me', 'initial_equity'
+    __slots__ = 'asset_accounts', 'inventory', 'contracts', 'goods_accounts', 'liability_accounts', 'initial_equity'
 
-    def __init__(self, me) -> None:
+    def __init__(self) -> None:
         # A Ledger is a list of accounts (for quicker searching)
 
         # Each Account includes an inventory to hold one type of contract.
@@ -82,7 +82,6 @@ class Ledger(object):
         self.contracts = Contracts()
         self.goods_accounts: Dict[Any] = {}
         self.liability_accounts: Dict[Any] = {}  # a hashmap from a contract to a liability_account
-        self.me = me
         self.initial_equity = 0
 
     def get_asset_valuation(self) -> np.longdouble:
@@ -136,7 +135,7 @@ class Ledger(object):
 
         if asset_account is None:
             # If there doesn't exist an Account to hold this type of contract, we create it
-            asset_account = Account(contract.get_name(self.me), AccountType.ASSET)
+            asset_account = Account(contract.get_name(), AccountType.ASSET)
             self.add_account(asset_account, contract)
 
         asset_account.debit(contract.get_valuation('A'))
@@ -151,7 +150,7 @@ class Ledger(object):
 
         if liability_account is None:
             # If there doesn't exist an Account to hold this type of contract, we create it
-            liability_account = Account(contract.get_name(self.me), AccountType.LIABILITY)
+            liability_account = Account(contract.get_name(), AccountType.LIABILITY)
             self.add_account(liability_account, contract)
 
         liability_account.credit(contract.get_valuation('L'))
