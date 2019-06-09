@@ -1,4 +1,5 @@
 from setuptools import setup
+from Cython.Build import cythonize
 
 
 setup(name='economicsl',
@@ -9,4 +10,5 @@ setup(name='economicsl',
       author_email='rhtbot@protonmail.com',
       license='MIT',
       packages=['economicsl'],
+      ext_modules=cythonize(['economicsl/%s.py' % i for i in ['contract']]),
       zip_safe=False)
