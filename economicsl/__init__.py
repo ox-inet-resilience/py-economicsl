@@ -263,15 +263,14 @@ class Mailbox(object):
         return self.obligation_inbox
 
 
-class BankersRounding:
-    def do_bankers_rounding(self, valuation: np.longdouble) -> int:
-        s = int(valuation)
-        t = abs(valuation - s)
+def do_bankers_rounding(self, valuation: np.longdouble) -> int:
+    s = int(valuation)
+    t = abs(valuation - s)
 
-        if ((t < 0.5) or (t == 0.5 and s % 2 == 0)):
-            return s
+    if ((t < 0.5) or (t == 0.5 and s % 2 == 0)):
+        return s
+    else:
+        if (valuation < 0):
+            return s - 1
         else:
-            if (valuation < 0):
-                return s - 1
-            else:
-                return s + 1
+            return s + 1
