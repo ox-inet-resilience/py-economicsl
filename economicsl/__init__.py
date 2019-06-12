@@ -160,15 +160,6 @@ class Message(object):
         self.message = message
         self.topic = topic
 
-    def get_sender(self) -> Agent:
-        return self.sender
-
-    def get_message(self):
-        return self.message
-
-    def get_topic(self) -> str:
-        return self.topic
-
 
 class GoodMessage(object):
     __slots__ = 'good_name', 'amount', 'valuation'
