@@ -17,7 +17,7 @@ class Contract(object):
         return self.liabilityParty
 
     def get_valuation(self, side):
-        # `side` is whether A or L
+        # `side` is either A or L
         pass
 
     def get_action(self, me):
