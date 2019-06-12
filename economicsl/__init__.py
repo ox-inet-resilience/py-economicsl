@@ -11,6 +11,8 @@ from .contract import Contract  # NOQA
 
 
 class Simulation:
+    __slots__ = 'time', 'postbox'
+
     def __init__(self) -> None:
         self.time = 0
         self.postbox: Deque[Any] = deque()
