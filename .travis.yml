@@ -7,7 +7,7 @@ cache:
 python:
   - 3.6
 install:
-  - pip install coveralls flake8
+  - pip install coveralls flake8 Cython
   - pip install .
 script:
   - flake8 . --ignore=F403,E501,E123,E128,F401 --exclude=build

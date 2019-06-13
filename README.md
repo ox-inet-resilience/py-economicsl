@@ -22,10 +22,12 @@ This library uses Python >=3.5 type system, so it runs only on python>=3.5.
 
 To install, run
 ```
+$ pip install Cython
 $ pip install git+https://github.com/ox-inet-resilience/py-economicsl
 ```
 
 or from this repo
 ```
+$ pip install Cython
 $ pip install .
 ```
