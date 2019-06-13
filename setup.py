@@ -11,4 +11,7 @@ setup(name='economicsl',
       license='MIT',
       packages=['economicsl'],
       ext_modules=cythonize(['economicsl/%s.py' % i for i in ['contract']]),
+      package_data={
+          '': ['*.pxd'],
+      },
       zip_safe=False)
