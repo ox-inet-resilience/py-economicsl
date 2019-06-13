@@ -1,5 +1,11 @@
 from setuptools import setup
-from Cython.Build import cythonize
+try:
+    from Cython.Build import cythonize
+except ImportError:
+    # create closure for deferred import
+    def cythonize (*args, ** kwargs ):
+        from Cython.Build import cythonize
+        return cythonize(*args, ** kwargs)
 
 
 setup(name='economicsl',
@@ -12,6 +18,6 @@ setup(name='economicsl',
       packages=['economicsl'],
       ext_modules=cythonize(['economicsl/%s.py' % i for i in ['contract']]),
       package_data={
-          '': ['*.pxd'],
+          'economicsl': ['*.pxd'],
       },
       zip_safe=False)
