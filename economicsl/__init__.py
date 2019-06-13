@@ -185,10 +185,13 @@ class Mailbox(object):
         if isinstance(message, Obligation):
             self.obligation_unopened.append(message)
 
-            logging.debug("Obligation received. " + message.get_from().get_name() +
-                          " must pay " + str(message.get_amount()) + " to " +
-                          message.get_to().get_name() +
-                          " on timestep " + str(message.get_time_to_pay()))
+            _from = message.get_from().get_name()
+            _amount = message.get_amount()
+            _to = message.get_to().get_name()
+            ttp = message.get_time_to_pay()
+            logging.debug(f"Obligation received. {_from}"
+                          f" must pay {_amount} to {_to}"
+                          f" on timestep {ttp}")
         elif isinstance(message, GoodMessage):
             # Process goods
             print(message)
