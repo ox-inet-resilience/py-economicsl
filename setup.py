@@ -1,5 +1,4 @@
-from setuptools import setup
-from Cython.Build import cythonize
+from setuptools import setup, Extension
 
 
 setup(name='economicsl',
@@ -10,8 +9,12 @@ setup(name='economicsl',
       author_email='rhtbot@protonmail.com',
       license='MIT',
       packages=['economicsl'],
-      ext_modules=cythonize(['economicsl/%s.py' % i for i in ['contract']]),
-      setup_requires=['cython'],
+      # https://stackoverflow.com/questions/37471313/setup-requires-with-cython/38057196#38057196
+      ext_modules=[
+          Extension(
+              'economicsl.contract',
+              sources=['economicsl/contract.py'])],
+      setup_requires=['setuptools>=18.0', 'cython'],
       package_data={
           'economicsl': ['*.pxd'],
       },
