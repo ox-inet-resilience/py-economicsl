@@ -13,7 +13,7 @@ class Account(object):
         self.name: str = name
         self.account_type: int = account_type
         self.balance = np.longdouble(starting_balance)
-        # PERF cache sign for faster debit/credit
+        # (PERF) cache sign for faster debit/credit
         self._is_asset_or_expenses: bool = (account_type == AccountType.ASSET) or (account_type == AccountType.EXPENSES)
 
     def debit(self, amount: np.longdouble) -> None:
@@ -33,12 +33,6 @@ class Account(object):
             self.balance -= amount
         else:
             self.balance += amount
-
-    def get_account_type(self) -> int:
-        return self.account_type
-
-    def get_balance(self) -> np.longdouble:
-        return self.balance
 
     def get_name(self) -> str:
         return self.name
@@ -165,7 +159,7 @@ class Ledger(FastLedger):
         return (sum(a.get_valuation('A') for sublist in self.contracts.all_assets.values() for a in sublist) + self.inventory.get_cash())
 
     def add_account(self, account, contract_type) -> None:
-        switch = account.get_account_type()
+        switch = account.account_type
         if switch == AccountType.ASSET:
             self.asset_accounts[contract_type] = account
         elif switch == AccountType.LIABILITY:
@@ -228,7 +222,7 @@ class Ledger(FastLedger):
 
     def get_physical_thing_valuation(self, name: str) -> np.longdouble:
         try:
-            return self.get_goods_account(name).get_balance() / self.inventory.get_good(name)
+            return self.get_goods_account(name).balance / self.inventory.get_good(name)
         except Exception:
             return 0.0
 
@@ -237,7 +231,7 @@ class Ledger(FastLedger):
         Reevaluate the current stock of physical goods at a specified valuation and book
         the change to GoodsAccount.
         """
-        old_valuation = self.get_goods_account(name).get_balance()
+        old_valuation = self.get_goods_account(name).balance
         new_valuation = self.inventory.get_good(name) * valuation
         if new_valuation > old_valuation:
             self.get_goods_account(name).debit(new_valuation - old_valuation)
@@ -283,7 +277,7 @@ class Ledger(FastLedger):
     def print_balance_sheet(self, me) -> None:
         print("Asset accounts:\n---------------")
         for a in self.asset_accounts.values():
-            print(a.get_name(), "-> %.2f" % a.get_balance())
+            print(a.get_name(), "-> %.2f" % a.balance)
 
         print("Breakdown: ")
         for c in self.get_all_assets():
@@ -292,7 +286,7 @@ class Ledger(FastLedger):
 
         print("\nLiability accounts:\n---------------")
         for a in self.liability_accounts.values():
-            print(a.get_name(), " -> %.2f" % a.get_balance())
+            print(a.get_name(), " -> %.2f" % a.balance)
         for c in self.get_all_liabilities():
             print("\t", c.get_name(me), " > ", c.get_valuation('L'))
         print("TOTAL LIABILITIES: %.2f" % self.get_liability_valuation())
