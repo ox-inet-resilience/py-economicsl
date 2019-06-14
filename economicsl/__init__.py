@@ -7,7 +7,6 @@ from .accounting import FastLedger
 from .obligations import Obligation
 from .accounting import AccountType  # NOQA
 from .abce import NotEnoughGoods  # NOQA
-from .contract import Contract  # NOQA
 
 
 class Simulation:
