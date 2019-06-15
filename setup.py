@@ -13,7 +13,12 @@ setup(name='economicsl',
       ext_modules=[
           Extension(
               'economicsl.contract',
-              sources=['economicsl/contract.py'])],
+              sources=['economicsl/contract.py']),
+          Extension(
+              'economicsl.accounting',
+              ['economicsl/accounting.py']
+          )
+      ],
       setup_requires=['setuptools>=18.0', 'cython'],
       package_data={
           'economicsl': ['*.pxd'],

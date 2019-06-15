@@ -48,7 +48,6 @@ AccountType = enum(ASSET=1,
                    EXPENSES=5,
                    GOOD=6)
 
-
 class FastLedger(object):
     __slots__ = 'cash', 'contracts', 'initial_equity'
 
@@ -57,11 +56,25 @@ class FastLedger(object):
         self.contracts = Contracts()
         self.initial_equity = 0.0
 
-    def get_asset_valuation(self) -> np.longdouble:
-        return sum(a.get_valuation('A') for sublist in self.contracts.all_assets.values() for a in sublist) + self.cash
+    def get_asset_valuation(self):
+        #return sum(a.get_valuation('A') for sublist in self.contracts.all_assets.values() for a in sublist) + self.cash
+        # A raw loop is used instead of dict comprehension above because this
+        # is the only way to optimize in Cython
+        out = 0.0
+        for sublist in self.contracts.all_assets.values():
+            for a in sublist:
+                out += a.get_valuation('A')
+        return out + self.cash
 
-    def get_liability_valuation(self) -> np.longdouble:
-        return sum(l.get_valuation('L') for sublist in self.contracts.all_liabilities.values() for l in sublist)
+    def get_liability_valuation(self):
+        #return sum(l.get_valuation('L') for sublist in self.contracts.all_liabilities.values() for l in sublist)
+        # A raw loop is used instead of dict comprehension above because this
+        # is the only way to optimize in Cython
+        out = 0.0
+        for sublist in self.contracts.all_liabilities.values():
+            for a in sublist:
+                out += a.get_valuation('L')
+        return out
 
     def get_equity_valuation(self) -> np.longdouble:
         return self.get_asset_valuation() - self.get_liability_valuation()
