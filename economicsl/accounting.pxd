@@ -15,9 +15,9 @@ cdef class FastLedger:
     cdef public object contracts
     cdef public long double initial_equity
 
-    @cython.locals(out = cython.longdouble, a = Contract)
+    @cython.locals(out=cython.longdouble, sublist=list, a=Contract)
     cpdef long double get_asset_valuation(self)
-    @cython.locals(out = cython.longdouble, a = Contract)
+    @cython.locals(out=cython.longdouble, sublist=list, a=Contract)
     cpdef long double get_liability_valuation(self)
     cpdef long double get_equity_valuation(self)
     #cpdef long double get_asset_valuation_of(self, object contract_type, contract_subtype=*)
