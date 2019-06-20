@@ -80,12 +80,24 @@ class FastLedger(object):
         return self.get_asset_valuation() - self.get_liability_valuation()
 
     def get_asset_valuation_of(self, contract_type, contract_subtype=None) -> np.longdouble:
+        out = 0.0
         if contract_subtype:
-            return sum(c.get_valuation('A') for c in self.contracts.all_assets[contract_type.ctype] if c.get_asset_type() == contract_subtype)
-        return sum(c.get_valuation('A') for c in self.contracts.all_assets[contract_type.ctype])
+            # return sum(c.get_valuation('A') for c in self.contracts.all_assets[contract_type.ctype] if c.get_asset_type() == contract_subtype)
+            for c in self.contracts.all_assets[contract_type.ctype]:
+                if c.get_asset_type() == contract_subtype:
+                    out += c.get_valuation('A')
+        else:
+            # return sum(c.get_valuation('A') for c in self.contracts.all_assets[contract_type.ctype])
+            for c in self.contracts.all_assets[contract_type.ctype]:
+                out += c.get_valuation('A')
+        return out
 
     def get_liability_valuation_of(self, contract_type) -> np.longdouble:
-        return sum(c.get_valuation('L') for c in self.contracts.all_liabilities[contract_type.ctype])
+        # return sum(c.get_valuation('L') for c in self.contracts.all_liabilities[contract_type.ctype])
+        out = 0.0
+        for c in self.contracts.all_liabilities[contract_type.ctype]:
+            out += c.get_valuation('L')
+        return out
 
     def get_all_assets(self) -> List[Any]:
         return [asset for sublist in self.contracts.all_assets.values() for asset in sublist]
