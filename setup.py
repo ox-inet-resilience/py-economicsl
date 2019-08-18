@@ -2,7 +2,7 @@ from setuptools import setup, Extension
 
 
 setup(name='economicsl',
-      version='0.2',
+      version='0.4',
       description='Colorful blue ideas live hostilely',
       url='https://github.com/rht/economicsl',
       author='rhtbot',
