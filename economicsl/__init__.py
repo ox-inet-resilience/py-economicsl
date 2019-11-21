@@ -90,7 +90,7 @@ class Agent(Messenger):
     def add_cash(self, amount: np.longdouble) -> None:
         self.main_ledger.add_cash(amount)
 
-    def get_cash_(self) -> np.longdouble:
+    def get_cash(self) -> np.longdouble:
         # the FastLedger version is intentionally used here
         # because wrapping cash with get_cash() in Ledger would only add
         # another extra method call
