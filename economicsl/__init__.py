@@ -11,7 +11,7 @@ from .abce import NotEnoughGoods  # NOQA
 
 class Simulation:
     # Disabled because sometimes the child class needs extra attributes
-    #__slots__ = 'time', 'postbox'
+    # __slots__ = 'time', 'postbox'
 
     def __init__(self) -> None:
         self.time = 0
