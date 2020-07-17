@@ -1,5 +1,4 @@
 from collections import defaultdict
-import numpy as np
 
 
 eps = 5e-9

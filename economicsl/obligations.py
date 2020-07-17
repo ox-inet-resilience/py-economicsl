@@ -1,6 +1,3 @@
-import numpy as np
-
-
 class Obligation(object):
     __slots__ = 'amount', 'from_', 'to', 'time_to_open', 'time_to_pay', 'time_to_receive', 'simulation', 'fulfilled'
 

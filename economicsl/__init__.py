@@ -1,7 +1,6 @@
 from typing import List, Union, Deque, Any
 from collections import deque
 import logging
-import numpy as np
 
 from .accounting import FastLedger
 from .obligations import Obligation
@@ -166,7 +165,7 @@ class Message(object):
 class GoodMessage(object):
     __slots__ = 'good_name', 'amount', 'valuation'
 
-    def __init__(self, good_name: str, amount: float, valuation: np.longdouble) -> None:
+    def __init__(self, good_name: str, amount: float, valuation: float) -> None:
         self.good_name = good_name
         self.amount = float(amount)
         self.valuation = valuation
