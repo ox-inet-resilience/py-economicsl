@@ -14,7 +14,7 @@ class Account(object):
         # (PERF) cache sign for faster debit/credit
         self._is_asset_or_expenses: bool = (account_type == AccountType.ASSET) or (account_type == AccountType.EXPENSES)
 
-    def debit(self, amount: float) -> None:
+    def debit(self, amount):
         """
         A Debit is a positive change for ASSET and EXPENSES accounts, and negative for the rest.
         """
@@ -23,7 +23,7 @@ class Account(object):
         else:
             self.balance -= amount
 
-    def credit(self, amount: float) -> None:
+    def credit(self, amount):
         """
         A Credit is a negative change for ASSET and EXPENSES accounts, and positive for the rest.
         """
