@@ -87,10 +87,10 @@ class Agent(Messenger):
     def is_alive(self) -> bool:
         return self.alive
 
-    def add_cash(self, amount: np.longdouble) -> None:
+    def add_cash(self, amount: float) -> None:
         self.main_ledger.add_cash(amount)
 
-    def get_cash(self) -> np.longdouble:
+    def get_cash(self) -> float:
         # the FastLedger version is intentionally used here
         # because wrapping cash with get_cash() in Ledger would only add
         # another extra method call
@@ -110,16 +110,16 @@ class Action(object):
 
     def __init__(self, me: Agent) -> None:
         self.me = me
-        self.amount = np.longdouble(0.0)
+        self.amount = 0.0
 
     def perform(self) -> None:
         pass
 
-    def get_amount(self) -> np.longdouble:
+    def get_amount(self) -> float:
         return self.amount
 
-    def set_amount(self, amount: np.longdouble):
-        self.amount = np.longdouble(amount)
+    def set_amount(self, amount: float):
+        self.amount = float(amount)
 
     def get_time(self) -> int:
         return self.me.get_time()
@@ -147,7 +147,7 @@ class Trade(Agent):
                amount_give, valuation_give) -> None:
         raise NotImplementedError
 
-    def give(self, recipient: Agent, good_name: str, amount_give: np.longdouble) -> None:
+    def give(self, recipient: Agent, good_name: str, amount_give: float) -> None:
         valuation = self.get_ledger().get_physical_thing_valuation(good_name)
         self.get_ledger().destroy(good_name, amount_give)
         good_message = GoodMessage(good_name, amount_give, valuation)
@@ -166,9 +166,9 @@ class Message(object):
 class GoodMessage(object):
     __slots__ = 'good_name', 'amount', 'valuation'
 
-    def __init__(self, good_name: str, amount: np.longdouble, valuation: np.longdouble) -> None:
+    def __init__(self, good_name: str, amount: float, valuation: np.longdouble) -> None:
         self.good_name = good_name
-        self.amount = np.longdouble(amount)
+        self.amount = float(amount)
         self.valuation = valuation
 
 
@@ -203,14 +203,14 @@ class Mailbox(object):
     def add_to_obligation_outbox(self, obligation) -> None:
         self.obligation_outbox.append(obligation)
 
-    def get_matured_obligations(self) -> np.longdouble:
+    def get_matured_obligations(self) -> float:
         return sum([o.get_amount() for o in self.obligation_inbox if o.is_due() and
                     not o.is_fulfilled()])
 
-    def get_all_pending_obligations(self) -> np.longdouble:
+    def get_all_pending_obligations(self) -> float:
         return sum([o.get_amount() for o in self.obligation_inbox if not o.is_fulfilled()])
 
-    def get_pending_payments_to_me(self) -> np.longdouble:
+    def get_pending_payments_to_me(self) -> float:
         return sum([o.get_amount() for o in self.obligation_outbox if o.is_fulfilled()])
 
     def fulfil_all_requests(self) -> None:
@@ -266,7 +266,7 @@ class Mailbox(object):
         return self.obligation_inbox
 
 
-def do_bankers_rounding(self, valuation: np.longdouble) -> int:
+def do_bankers_rounding(self, valuation: float) -> int:
     s = int(valuation)
     t = abs(valuation - s)
 

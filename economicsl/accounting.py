@@ -9,14 +9,14 @@ from .contract import Contracts
 class Account(object):
     __slots__ = 'name', 'account_type', 'balance', '_is_asset_or_expenses'
 
-    def __init__(self, name: str, account_type: int, starting_balance: np.longdouble = 0.0) -> None:
+    def __init__(self, name: str, account_type: int, starting_balance: float = 0.0) -> None:
         self.name: str = name
         self.account_type: int = account_type
-        self.balance = np.longdouble(starting_balance)
+        self.balance = float(starting_balance)
         # (PERF) cache sign for faster debit/credit
         self._is_asset_or_expenses: bool = (account_type == AccountType.ASSET) or (account_type == AccountType.EXPENSES)
 
-    def debit(self, amount: np.longdouble) -> None:
+    def debit(self, amount: float) -> None:
         """
         A Debit is a positive change for ASSET and EXPENSES accounts, and negative for the rest.
         """
@@ -25,7 +25,7 @@ class Account(object):
         else:
             self.balance -= amount
 
-    def credit(self, amount: np.longdouble) -> None:
+    def credit(self, amount: float) -> None:
         """
         A Credit is a negative change for ASSET and EXPENSES accounts, and positive for the rest.
         """
@@ -77,10 +77,10 @@ class FastLedger(object):
                 out += a.get_valuation('L')
         return out
 
-    def get_equity_valuation(self) -> np.longdouble:
+    def get_equity_valuation(self) -> float:
         return self.get_asset_valuation() - self.get_liability_valuation()
 
-    def get_asset_valuation_of(self, contract_type, contract_subtype=None) -> np.longdouble:
+    def get_asset_valuation_of(self, contract_type, contract_subtype=None) -> float:
         out = 0.0
         if contract_subtype:
             # return sum(c.get_valuation('A') for c in self.contracts.all_assets[contract_type.ctype] if c.get_asset_type() == contract_subtype)
@@ -93,7 +93,7 @@ class FastLedger(object):
                 out += c.get_valuation('A')
         return out
 
-    def get_liability_valuation_of(self, contract_type) -> np.longdouble:
+    def get_liability_valuation_of(self, contract_type) -> float:
         # return sum(c.get_valuation('L') for c in self.contracts.all_liabilities[contract_type.ctype])
         out = 0.0
         for c in self.contracts.all_liabilities[contract_type.ctype]:
@@ -119,34 +119,34 @@ class FastLedger(object):
         self.contracts.all_liabilities[contract.ctype].append(contract)
 
     # where things deviate from Ledger
-    def add_cash(self, amount: np.longdouble) -> None:
-        self.cash += np.longdouble(amount)
+    def add_cash(self, amount: float) -> None:
+        self.cash += float(amount)
 
-    def subtract_cash(self, amount: np.longdouble) -> None:
-        self.cash -= np.longdouble(amount)
+    def subtract_cash(self, amount: float) -> None:
+        self.cash -= float(amount)
 
     def pay_liability(self, amount, loan) -> None:
         pass
 
-    def sell_asset(self, amount: np.longdouble, assetType) -> None:
+    def sell_asset(self, amount: float, assetType) -> None:
         pass
 
     def pull_funding(self, amount, loan) -> None:
         pass
 
-    def get_initial_equity(self) -> np.longdouble:
+    def get_initial_equity(self) -> float:
         return self.initial_equity
 
     def set_initial_valuations(self) -> None:
         self.initial_equity = self.get_equity_valuation()
 
-    def devalue_asset(self, asset, valuationLost: np.longdouble) -> None:
+    def devalue_asset(self, asset, valuationLost: float) -> None:
         pass
 
-    def appreciate_asset(self, asset, valuationLost: np.longdouble) -> None:
+    def appreciate_asset(self, asset, valuationLost: float) -> None:
         pass
 
-    def devalue_liability(self, liability, valuationLost: np.longdouble) -> None:
+    def devalue_liability(self, liability, valuationLost: float) -> None:
         pass
 
     def appreciate_liability(self, liability, valuationLost) -> None:
@@ -181,7 +181,7 @@ class Ledger(FastLedger):
         self.goods_accounts: Dict[Any] = {}
         self.liability_accounts: Dict[Any] = {}  # a hashmap from a contract to a liability_account
 
-    def get_asset_valuation(self) -> np.longdouble:
+    def get_asset_valuation(self) -> float:
         return (sum(a.get_valuation('A') for sublist in self.contracts.all_assets.values() for a in sublist) + self.inventory.get_cash())
 
     def add_account(self, account, contract_type) -> None:
@@ -246,7 +246,7 @@ class Ledger(FastLedger):
             self.goods_accounts[name] = account
         return account
 
-    def get_physical_thing_valuation(self, name: str) -> np.longdouble:
+    def get_physical_thing_valuation(self, name: str) -> float:
         try:
             return self.get_goods_account(name).balance / self.inventory.get_good(name)
         except Exception:
@@ -264,12 +264,12 @@ class Ledger(FastLedger):
         elif new_valuation < old_valuation:
             self.get_goods_account(name).credit(old_valuation - new_valuation)
 
-    def add_cash(self, amount: np.longdouble) -> None:
+    def add_cash(self, amount: float) -> None:
         # (dr cash, cr equity)
-        self.create("cash", np.longdouble(amount), 1.0)
+        self.create("cash", float(amount), 1.0)
 
-    def subtract_cash(self, amount: np.longdouble) -> None:
-        self.destroy("cash", np.longdouble(amount), 1.0)
+    def subtract_cash(self, amount: float) -> None:
+        self.destroy("cash", float(amount), 1.0)
 
     # Operation to pay back a liability loan; debit liability and credit cash
     # @param amount amount to pay back
@@ -285,7 +285,7 @@ class Ledger(FastLedger):
 
     # If I've sold an asset, debit cash and credit asset
     # @param amount the *valuation* of the asset
-    def sell_asset(self, amount: np.longdouble, assetType) -> None:
+    def sell_asset(self, amount: float, assetType) -> None:
         asset_account = self.asset_accounts.get(assetType)
 
         # (dr cash, cr asset)
@@ -325,7 +325,7 @@ class Ledger(FastLedger):
         # print("Encumbered cash:", self.get_encumbered_cash())
         # print("Unencumbered cash: " + (me.getCash_() - me.getEncumberedCash()));
 
-    def get_initial_equity(self) -> np.longdouble:
+    def get_initial_equity(self) -> float:
         return self.initial_equity
 
     def set_initial_valuations(self) -> None:
@@ -337,7 +337,7 @@ class Ledger(FastLedger):
     def get_cash_account(self) -> Account:
         return self.get_goods_account("cash")
 
-    def devalue_asset(self, asset, valuationLost: np.longdouble) -> None:
+    def devalue_asset(self, asset, valuationLost: float) -> None:
         """
         if an Asset loses valuation, I must credit asset
         @param valuationLost the valuation lost
@@ -346,15 +346,15 @@ class Ledger(FastLedger):
 
         # TODO: perform a check here that the Asset account balances match the valuation of the assets. (?)
 
-    def appreciate_asset(self, asset, valuationLost: np.longdouble) -> None:
+    def appreciate_asset(self, asset, valuationLost: float) -> None:
         self.asset_accounts.get(asset).debit(valuationLost)
 
-    def devalue_liability(self, liability, valuationLost: np.longdouble) -> None:
+    def devalue_liability(self, liability, valuationLost: float) -> None:
         self.liability_accounts.get(liability).debit(valuationLost)
 
     def appreciate_liability(self, liability, valuationLost) -> None:
         self.liability_accounts.get(liability).credit(valuationLost)
 
-    def book(self, debit_account: Account, credit_account: Account, amount: np.longdouble):
+    def book(self, debit_account: Account, credit_account: Account, amount: float):
         debit_account.debit(amount)
         credit_account.credit(amount)
