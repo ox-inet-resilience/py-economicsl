@@ -1,7 +1,5 @@
 from typing import Any, List, Dict
 
-import numpy as np
-
 from .abce import NotEnoughGoods, Inventory, eps
 from .contract import Contracts
 
