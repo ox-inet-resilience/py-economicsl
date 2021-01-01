@@ -1,7 +1,7 @@
 # python-distilledESL
 
 [![DOI](https://zenodo.org/badge/95235014.svg)](https://zenodo.org/badge/latestdoi/95235014)
-[![Build Status](https://travis-ci.org/ox-inet-resilience/py-economicsl.svg?branch=master)](https://travis-ci.org/ox-inet-resilience/py-economicsl)
+[![Build Status](https://github.com/ox-inet-resilience/py-economicsl/workflows/build/badge.svg)](https://github.com/ox-inet-resilience/py-economicsl/actions?query=workflow%3Abuild)
 
 This is a python port of the entirety of
 https://github.com/EconomicSL/distilledESL, further trimmed to its essence.
