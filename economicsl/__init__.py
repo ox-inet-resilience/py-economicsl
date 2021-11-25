@@ -29,7 +29,7 @@ class Simulation:
 
 
 class Messenger:
-    __slots__ = 'mailbox', 'postbox'
+    __slots__ = "mailbox", "postbox"
 
     def __init__(self):
         self.mailbox = Mailbox(self)
@@ -47,7 +47,7 @@ class Messenger:
     def send_cash(self, recipient, amount) -> None:
         self.send(recipient, amount)
 
-    def receive(self, message: Union[Obligation, 'GoodMessage']) -> None:
+    def receive(self, message: Union[Obligation, "GoodMessage"]) -> None:
         self.mailbox.receive(message)
 
     def print_mailbox(self) -> None:
@@ -61,7 +61,7 @@ class Messenger:
 
 
 class Agent(Messenger):
-    __slots__ = 'name', 'simulation', 'alive', 'main_ledger'
+    __slots__ = "name", "simulation", "alive", "main_ledger"
 
     def __init__(self, name: str, simulation: Simulation) -> None:
         super().__init__()
@@ -72,10 +72,10 @@ class Agent(Messenger):
         self.main_ledger = FastLedger()
 
     def add(self, contract) -> None:
-        if (contract.get_asset_party() == self):
+        if contract.get_asset_party() == self:
             # This contract is an asset for me.
             self.main_ledger.add_asset(contract)
-        elif (contract.get_liability_party() == self):
+        elif contract.get_liability_party() == self:
             # This contract is a liability for me
             self.main_ledger.add_liability(contract)
 
@@ -110,7 +110,7 @@ class Agent(Messenger):
 
 
 class Action:
-    __slots__ = 'me', 'amount'
+    __slots__ = "me", "amount"
 
     def __init__(self, me: Agent) -> None:
         self.me = me
@@ -147,8 +147,16 @@ class Trade(Agent):
         super().__init__(name, simulation)
 
     # Trade good one against good two
-    def barter(self, trade_partner, name_get, amount_get, valuation_get, name_give,
-               amount_give, valuation_give) -> None:
+    def barter(
+        self,
+        trade_partner,
+        name_get,
+        amount_get,
+        valuation_get,
+        name_give,
+        amount_give,
+        valuation_give,
+    ) -> None:
         raise NotImplementedError
 
     def give(self, recipient: Agent, good_name: str, amount_give: float) -> None:
@@ -159,7 +167,7 @@ class Trade(Agent):
 
 
 class Mailbox:
-    __slots__ = 'me', 'obligation_unopened', 'obligation_outbox', 'obligation_inbox'
+    __slots__ = "me", "obligation_unopened", "obligation_outbox", "obligation_inbox"
 
     def __init__(self, me) -> None:
         self.me = me
@@ -175,13 +183,17 @@ class Mailbox:
             _amount = message.get_amount()
             _to = message.get_to().get_name()
             ttp = message.get_time_to_pay()
-            logging.debug(f"Obligation received. {_from}"
-                          f" must pay {_amount} to {_to}"
-                          f" on timestep {ttp}")
+            logging.debug(
+                f"Obligation received. {_from}"
+                f" must pay {_amount} to {_to}"
+                f" on timestep {ttp}"
+            )
         elif isinstance(message, GoodMessage):
             # Process goods
             print(message)
-            self.me.get_ledger().create(message.good_name, message.amount, message.valuation)
+            self.me.get_ledger().create(
+                message.good_name, message.amount, message.valuation
+            )
         else:
             # Process cash
             self.me.add_cash(message)
@@ -190,11 +202,18 @@ class Mailbox:
         self.obligation_outbox.append(obligation)
 
     def get_matured_obligations(self) -> float:
-        return sum([o.get_amount() for o in self.obligation_inbox if o.is_due() and
-                    not o.is_fulfilled()])
+        return sum(
+            [
+                o.get_amount()
+                for o in self.obligation_inbox
+                if o.is_due() and not o.is_fulfilled()
+            ]
+        )
 
     def get_all_pending_obligations(self) -> float:
-        return sum([o.get_amount() for o in self.obligation_inbox if not o.is_fulfilled()])
+        return sum(
+            [o.get_amount() for o in self.obligation_inbox if not o.is_fulfilled()]
+        )
 
     def get_pending_payments_to_me(self) -> float:
         return sum([o.get_amount() for o in self.obligation_outbox if o.is_fulfilled()])
@@ -217,15 +236,24 @@ class Mailbox:
         """
         self.obligation_inbox = [o for o in self.obligation_inbox if not o.fulfilled]
         # PERF o.from_.alive is faster than o.get_from().is_alive()
-        self.obligation_outbox = [o for o in self.obligation_outbox if (not o.fulfilled) and o.from_.alive]
+        self.obligation_outbox = [
+            o for o in self.obligation_outbox if (not o.fulfilled) and o.from_.alive
+        ]
 
         # Move all messages in the obligation_unopened to the obligation_inbox
-        self.obligation_inbox += [o for o in self.obligation_unopened if o.has_arrived()]
-        self.obligation_unopened = [o for o in self.obligation_unopened if not o.has_arrived()]
+        self.obligation_inbox += [
+            o for o in self.obligation_unopened if o.has_arrived()
+        ]
+        self.obligation_unopened = [
+            o for o in self.obligation_unopened if not o.has_arrived()
+        ]
 
     def print_mailbox(self) -> None:
-        if ((not self.obligation_unopened) and (not self.obligation_inbox) and
-           (not self.obligation_outbox)):
+        if (
+            (not self.obligation_unopened)
+            and (not self.obligation_inbox)
+            and (not self.obligation_outbox)
+        ):
             print("\nObligationsAndGoodsMailbox is empty.")
         else:
             print("\nObligationsAndGoodsMailbox contents:")
@@ -256,10 +284,10 @@ def do_bankers_rounding(self, valuation: float) -> int:
     s = int(valuation)
     t = abs(valuation - s)
 
-    if ((t < 0.5) or (t == 0.5 and s % 2 == 0)):
+    if (t < 0.5) or (t == 0.5 and s % 2 == 0):
         return s
     else:
-        if (valuation < 0):
+        if valuation < 0:
             return s - 1
         else:
             return s + 1

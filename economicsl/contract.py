@@ -2,9 +2,9 @@ from collections import defaultdict
 
 
 class Contract:
-    __slots__ = 'assetParty', 'liabilityParty'
+    __slots__ = "assetParty", "liabilityParty"
     """Base class for a model contract"""
-    ctype = 'Contract'
+    ctype = "Contract"
 
     def __init__(self, assetParty, liabilityParty):
         self.assetParty = assetParty
@@ -31,7 +31,7 @@ class Contract:
 
 
 class Contracts:
-    __slots__ = 'all_assets', 'all_liabilities'
+    __slots__ = "all_assets", "all_liabilities"
 
     def __init__(self):
         self.all_assets = defaultdict(list)

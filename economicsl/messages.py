@@ -5,7 +5,7 @@ if TYPE_CHECKING:
 
 
 class Message:
-    __slots__ = 'sender', 'message', 'topic'
+    __slots__ = "sender", "message", "topic"
 
     def __init__(self, sender: "Agent", topic: str, message) -> None:
         self.sender = sender
@@ -14,7 +14,7 @@ class Message:
 
 
 class GoodMessage:
-    __slots__ = 'good_name', 'amount', 'valuation'
+    __slots__ = "good_name", "amount", "valuation"
 
     def __init__(self, good_name: str, amount: float, valuation: float) -> None:
         self.good_name = good_name
@@ -23,7 +23,16 @@ class GoodMessage:
 
 
 class Obligation:
-    __slots__ = 'amount', 'from_', 'to', 'time_to_open', 'time_to_pay', 'time_to_receive', 'simulation', 'fulfilled'
+    __slots__ = (
+        "amount",
+        "from_",
+        "to",
+        "time_to_open",
+        "time_to_pay",
+        "time_to_receive",
+        "simulation",
+        "fulfilled",
+    )
 
     def __init__(self, contract, amount: float, timeLeftToPay: int) -> None:
         self.amount = float(amount)
@@ -75,7 +84,15 @@ class Obligation:
         return self.time_to_receive
 
     def print_obligation(self) -> None:
-        print("Obligation from ", self.get_from().get_name(), " to pay ",
-              self.get_to().get_name(), " an amount ", self.get_amount(),
-              " on timestep ", self.get_time_to_pay(), " to arrive by timestep ",
-              self.get_time_to_receive())
+        print(
+            "Obligation from ",
+            self.get_from().get_name(),
+            " to pay ",
+            self.get_to().get_name(),
+            " an amount ",
+            self.get_amount(),
+            " on timestep ",
+            self.get_time_to_pay(),
+            " to arrive by timestep ",
+            self.get_time_to_receive(),
+        )

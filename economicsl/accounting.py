@@ -5,14 +5,18 @@ from .contract import Contracts
 
 
 class Account:
-    __slots__ = 'name', 'account_type', 'balance', '_is_asset_or_expenses'
+    __slots__ = "name", "account_type", "balance", "_is_asset_or_expenses"
 
-    def __init__(self, name: str, account_type: int, starting_balance: float = 0.0) -> None:
+    def __init__(
+        self, name: str, account_type: int, starting_balance: float = 0.0
+    ) -> None:
         self.name: str = name
         self.account_type: int = account_type
         self.balance = float(starting_balance)
         # (PERF) cache sign for faster debit/credit
-        self._is_asset_or_expenses: bool = (account_type == AccountType.ASSET) or (account_type == AccountType.EXPENSES)
+        self._is_asset_or_expenses: bool = (account_type == AccountType.ASSET) or (
+            account_type == AccountType.EXPENSES
+        )
 
     def debit(self, amount):
         """
@@ -37,18 +41,14 @@ class Account:
 
 
 def enum(**enums):
-    return type('Enum', (), enums)
+    return type("Enum", (), enums)
 
 
-AccountType = enum(ASSET=1,
-                   LIABILITY=2,
-                   INCOME=4,
-                   EXPENSES=5,
-                   GOOD=6)
+AccountType = enum(ASSET=1, LIABILITY=2, INCOME=4, EXPENSES=5, GOOD=6)
 
 
 class FastLedger:
-    __slots__ = 'cash', 'contracts', 'initial_equity'
+    __slots__ = "cash", "contracts", "initial_equity"
 
     def __init__(self):
         self.cash = 0.0
@@ -62,7 +62,7 @@ class FastLedger:
         out = 0.0
         for sublist in self.contracts.all_assets.values():
             for a in sublist:
-                out += a.get_valuation('A')
+                out += a.get_valuation("A")
         return out + self.cash
 
     def get_liability_valuation(self):
@@ -72,7 +72,7 @@ class FastLedger:
         out = 0.0
         for sublist in self.contracts.all_liabilities.values():
             for a in sublist:
-                out += a.get_valuation('L')
+                out += a.get_valuation("L")
         return out
 
     def get_equity_valuation(self) -> float:
@@ -84,25 +84,31 @@ class FastLedger:
             # return sum(c.get_valuation('A') for c in self.contracts.all_assets[contract_type.ctype] if c.get_asset_type() == contract_subtype)
             for c in self.contracts.all_assets[contract_type.ctype]:
                 if c.get_asset_type() == contract_subtype:
-                    out += c.get_valuation('A')
+                    out += c.get_valuation("A")
         else:
             # return sum(c.get_valuation('A') for c in self.contracts.all_assets[contract_type.ctype])
             for c in self.contracts.all_assets[contract_type.ctype]:
-                out += c.get_valuation('A')
+                out += c.get_valuation("A")
         return out
 
     def get_liability_valuation_of(self, contract_type) -> float:
         # return sum(c.get_valuation('L') for c in self.contracts.all_liabilities[contract_type.ctype])
         out = 0.0
         for c in self.contracts.all_liabilities[contract_type.ctype]:
-            out += c.get_valuation('L')
+            out += c.get_valuation("L")
         return out
 
     def get_all_assets(self) -> List[Any]:
-        return [asset for sublist in self.contracts.all_assets.values() for asset in sublist]
+        return [
+            asset for sublist in self.contracts.all_assets.values() for asset in sublist
+        ]
 
     def get_all_liabilities(self) -> List[Any]:
-        return [lia for sublist in self.contracts.all_liabilities.values() for lia in sublist]
+        return [
+            lia
+            for sublist in self.contracts.all_liabilities.values()
+            for lia in sublist
+        ]
 
     def get_assets_of_type(self, contractType) -> List[Any]:
         return self.contracts.all_assets[contractType.ctype]
@@ -162,7 +168,7 @@ class FastLedger:
 # A simple economic agent will usually have a single Ledger, whereas complex firms and banks can have several books
 # (as in branch banking for example).
 class Ledger(FastLedger):
-    __slots__ = 'asset_accounts', 'inventory', 'goods_accounts', 'liability_accounts'
+    __slots__ = "asset_accounts", "inventory", "goods_accounts", "liability_accounts"
 
     def __init__(self) -> None:
         # A Ledger is a list of accounts (for quicker searching)
@@ -174,13 +180,24 @@ class Ledger(FastLedger):
 
         # A book is initially created with a cash account (it's the simplest possible book)
         super().__init__()
-        self.asset_accounts: Dict[Any] = {}  # a hashmap from a contract to an asset_account
+        self.asset_accounts: Dict[
+            Any
+        ] = {}  # a hashmap from a contract to an asset_account
         self.inventory = Inventory()
         self.goods_accounts: Dict[Any] = {}
-        self.liability_accounts: Dict[Any] = {}  # a hashmap from a contract to a liability_account
+        self.liability_accounts: Dict[
+            Any
+        ] = {}  # a hashmap from a contract to a liability_account
 
     def get_asset_valuation(self) -> float:
-        return (sum(a.get_valuation('A') for sublist in self.contracts.all_assets.values() for a in sublist) + self.inventory.get_cash())
+        return (
+            sum(
+                a.get_valuation("A")
+                for sublist in self.contracts.all_assets.values()
+                for a in sublist
+            )
+            + self.inventory.get_cash()
+        )
 
     def add_account(self, account, contract_type) -> None:
         switch = account.account_type
@@ -202,7 +219,7 @@ class Ledger(FastLedger):
             asset_account = Account(contract.get_name(), AccountType.ASSET)
             self.add_account(asset_account, contract)
 
-        asset_account.debit(contract.get_valuation('A'))
+        asset_account.debit(contract.get_valuation("A"))
 
         self.contracts.all_assets[contract.ctype].append(contract)
 
@@ -217,7 +234,7 @@ class Ledger(FastLedger):
             liability_account = Account(contract.get_name(), AccountType.LIABILITY)
             self.add_account(liability_account, contract)
 
-        liability_account.credit(contract.get_valuation('L'))
+        liability_account.credit(contract.get_valuation("L"))
 
         # Add to the general inventory?
         self.contracts.all_liabilities[contract.ctype].append(contract)
@@ -276,7 +293,10 @@ class Ledger(FastLedger):
         liability_account = self.liability_accounts.get(loan)
 
         # Pre-condition: liquidity has been raised.
-        assert (self.inventory.get_cash() - amount) >= -eps, (self.inventory.get_cash(), amount)
+        assert (self.inventory.get_cash() - amount) >= -eps, (
+            self.inventory.get_cash(),
+            amount,
+        )
 
         # (dr liability, cr cash )
         self.book(liability_account, self.get_goods_account("cash"), amount)
@@ -305,14 +325,14 @@ class Ledger(FastLedger):
 
         print("Breakdown: ")
         for c in self.get_all_assets():
-            print("\t", c.get_name(me), " > ", c.get_valuation('A'))
+            print("\t", c.get_name(me), " > ", c.get_valuation("A"))
         print("TOTAL ASSETS: %.2f" % self.get_asset_valuation())
 
         print("\nLiability accounts:\n---------------")
         for a in self.liability_accounts.values():
             print(a.get_name(), " -> %.2f" % a.balance)
         for c in self.get_all_liabilities():
-            print("\t", c.get_name(me), " > ", c.get_valuation('L'))
+            print("\t", c.get_name(me), " > ", c.get_valuation("L"))
         print("TOTAL LIABILITIES: %.2f" % self.get_liability_valuation())
         print("\nTOTAL EQUITY: %.2f" % self.get_equity_valuation())
 

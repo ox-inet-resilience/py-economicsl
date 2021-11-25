@@ -22,6 +22,7 @@ class NotEnoughGoods(Exception):
 
 # Accounting classes: Inventory
 
+
 class Inventory(defaultdict):
     def __init__(self) -> None:
         # cash defaults to 0.0
