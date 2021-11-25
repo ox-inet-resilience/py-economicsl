@@ -1,7 +1,10 @@
-from typing import Any, List, Dict
+from typing import Any, List, Dict, TYPE_CHECKING
 
 from .abce import NotEnoughGoods, Inventory, eps
 from .contract import Contracts
+
+if TYPE_CHECKING:
+    from .contract import Contract
 
 
 class Account:
@@ -180,14 +183,12 @@ class Ledger(FastLedger):
 
         # A book is initially created with a cash account (it's the simplest possible book)
         super().__init__()
-        self.asset_accounts: Dict[
-            Any
-        ] = {}  # a hashmap from a contract to an asset_account
+        # a hashmap from a contract type string to an asset_account
+        self.asset_accounts: Dict[str, Any] = {}
         self.inventory = Inventory()
-        self.goods_accounts: Dict[Any] = {}
-        self.liability_accounts: Dict[
-            Any
-        ] = {}  # a hashmap from a contract to a liability_account
+        self.goods_accounts: Dict[str, Any] = {}
+        # a hashmap from a contract type string to a liability_account
+        self.liability_accounts: Dict[str, Any] = {}
 
     def get_asset_valuation(self) -> float:
         return (
@@ -199,20 +200,20 @@ class Ledger(FastLedger):
             + self.inventory.get_cash()
         )
 
-    def add_account(self, account, contract_type) -> None:
+    def add_account(self, account, contract: Contract) -> None:
         switch = account.account_type
         if switch == AccountType.ASSET:
-            self.asset_accounts[contract_type] = account
+            self.asset_accounts[contract.ctype] = account
         elif switch == AccountType.LIABILITY:
-            self.liability_accounts[contract_type] = account
+            self.liability_accounts[contract.ctype] = account
 
         # TODO: Not sure what to do with INCOME, EXPENSES
 
     # Adding an asset means debiting the account relevant to that type of contract
     # and crediting equity.
     # @param contract an Asset contract to add
-    def add_asset(self, contract) -> None:
-        asset_account = self.asset_accounts.get(contract)
+    def add_asset(self, contract: Contract) -> None:
+        asset_account = self.asset_accounts.get(contract.ctype)
 
         if asset_account is None:
             # If there doesn't exist an Account to hold this type of contract, we create it
@@ -226,8 +227,8 @@ class Ledger(FastLedger):
     # Adding a liability means debiting equity and crediting the account
     # relevant to that type of contract.
     # @param contract a Liability contract to add
-    def add_liability(self, contract) -> None:
-        liability_account = self.liability_accounts.get(contract)
+    def add_liability(self, contract: Contract) -> None:
+        liability_account = self.liability_accounts.get(contract.ctype)
 
         if liability_account is None:
             # If there doesn't exist an Account to hold this type of contract, we create it
