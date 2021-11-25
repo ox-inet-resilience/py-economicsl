@@ -1,3 +1,27 @@
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from economicsl import Agent
+
+
+class Message:
+    __slots__ = 'sender', 'message', 'topic'
+
+    def __init__(self, sender: "Agent", topic: str, message) -> None:
+        self.sender = sender
+        self.message = message
+        self.topic = topic
+
+
+class GoodMessage:
+    __slots__ = 'good_name', 'amount', 'valuation'
+
+    def __init__(self, good_name: str, amount: float, valuation: float) -> None:
+        self.good_name = good_name
+        self.amount = float(amount)
+        self.valuation = valuation
+
+
 class Obligation:
     __slots__ = 'amount', 'from_', 'to', 'time_to_open', 'time_to_pay', 'time_to_receive', 'simulation', 'fulfilled'
 

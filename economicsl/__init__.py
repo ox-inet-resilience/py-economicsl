@@ -3,7 +3,7 @@ from collections import deque
 import logging
 
 from .accounting import FastLedger
-from .obligations import Obligation
+from .messages import Obligation, GoodMessage
 from .accounting import AccountType  # NOQA
 from .abce import NotEnoughGoods  # NOQA
 
@@ -156,24 +156,6 @@ class Trade(Agent):
         self.get_ledger().destroy(good_name, amount_give)
         good_message = GoodMessage(good_name, amount_give, valuation)
         self.postbox.append((recipient, good_message))
-
-
-class Message:
-    __slots__ = 'sender', 'message', 'topic'
-
-    def __init__(self, sender: Agent, topic: str, message) -> None:
-        self.sender = sender
-        self.message = message
-        self.topic = topic
-
-
-class GoodMessage:
-    __slots__ = 'good_name', 'amount', 'valuation'
-
-    def __init__(self, good_name: str, amount: float, valuation: float) -> None:
-        self.good_name = good_name
-        self.amount = float(amount)
-        self.valuation = valuation
 
 
 class Mailbox:
