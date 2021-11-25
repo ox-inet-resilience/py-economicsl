@@ -291,7 +291,9 @@ class Ledger(FastLedger):
     # @param amount amount to pay back
     # @param loan the loan which is being paid back
     def pay_liability(self, amount, loan) -> None:
-        liability_account = self.liability_accounts.get(loan)
+        liability_account = self.liability_accounts.get(loan.ctype)
+        if not liability_account:
+            raise Exception("Liability account for ${loan} doesn't exist")
 
         # Pre-condition: liquidity has been raised.
         assert (self.inventory.get_cash() - amount) >= -eps, (
@@ -304,8 +306,10 @@ class Ledger(FastLedger):
 
     # If I've sold an asset, debit cash and credit asset
     # @param amount the *valuation* of the asset
-    def sell_asset(self, amount: float, assetType) -> None:
+    def sell_asset(self, amount: float, assetType: str) -> None:
         asset_account = self.asset_accounts.get(assetType)
+        if not asset_account:
+            raise Exception("Asset account for ${assetType} doesn't exist")
 
         # (dr cash, cr asset)
         self.book(self.get_goods_account("cash"), asset_account, amount)
@@ -351,7 +355,7 @@ class Ledger(FastLedger):
         self.initial_equity = self.get_equity_valuation()
 
     def get_account_from_contract(self, contract):
-        return self.asset_accounts.get(contract)
+        return self.asset_accounts.get(contract.ctype)
 
     def get_cash_account(self) -> Account:
         return self.get_goods_account("cash")
@@ -361,18 +365,30 @@ class Ledger(FastLedger):
         if an Asset loses valuation, I must credit asset
         @param valuationLost the valuation lost
         """
-        self.asset_accounts.get(asset).credit(valuationLost)
+        account = self.asset_accounts.get(asset.ctype)
+        if not account:
+            raise Exception("Asset account not found for ${asset.ctype}.")
+        account.credit(valuationLost)
 
         # TODO: perform a check here that the Asset account balances match the valuation of the assets. (?)
 
     def appreciate_asset(self, asset, valuationLost: float) -> None:
-        self.asset_accounts.get(asset).debit(valuationLost)
+        account = self.asset_accounts.get(asset.ctype)
+        if not account:
+            raise Exception("Asset account not found for ${asset.ctype}.")
+        account.debit(valuationLost)
 
     def devalue_liability(self, liability, valuationLost: float) -> None:
-        self.liability_accounts.get(liability).debit(valuationLost)
+        account = self.liability_accounts.get(liability.ctype)
+        if not account:
+            raise Exception("Liability account not found for ${liability.ctype}.")
+        account.debit(valuationLost)
 
     def appreciate_liability(self, liability, valuationLost) -> None:
-        self.liability_accounts.get(liability).credit(valuationLost)
+        account = self.liability_accounts.get(liability.ctype)
+        if not account:
+            raise Exception("Liability account not found for ${liability.ctype}.")
+        account.credit(valuationLost)
 
     def book(self, debit_account: Account, credit_account: Account, amount: float):
         debit_account.debit(amount)
