@@ -21,7 +21,7 @@ class Simulation:
 
     def process_postbox(self):
         for recipient, msg in self.postbox:
-            recipient.receive_message(msg)
+            recipient.receive(msg)
         self.postbox.clear()
 
     def get_time(self) -> int:
@@ -47,8 +47,8 @@ class Messenger(object):
     def send_cash(self, recipient, amount) -> None:
         self.send(recipient, amount)
 
-    def receive_message(self, message: Union[Obligation, 'GoodMessage']) -> None:
-        self.mailbox.receive_message(message)
+    def receive(self, message: Union[Obligation, 'GoodMessage']) -> None:
+        self.mailbox.receive(message)
 
     def print_mailbox(self) -> None:
         self.mailbox.print_mailbox()
@@ -185,7 +185,7 @@ class Mailbox(object):
         self.obligation_outbox: List[Any] = []
         self.obligation_inbox: List[Any] = []
 
-    def receive_message(self, message) -> None:
+    def receive(self, message) -> None:
         if isinstance(message, Obligation):
             self.obligation_unopened.append(message)
 
