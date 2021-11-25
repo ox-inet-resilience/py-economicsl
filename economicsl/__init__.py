@@ -28,7 +28,7 @@ class Simulation:
         return self.time
 
 
-class Messenger(object):
+class Messenger:
     __slots__ = 'mailbox', 'postbox'
 
     def __init__(self):
@@ -109,7 +109,7 @@ class Agent(Messenger):
             self.mailbox.step()
 
 
-class Action(object):
+class Action:
     __slots__ = 'me', 'amount'
 
     def __init__(self, me: Agent) -> None:
@@ -158,7 +158,7 @@ class Trade(Agent):
         self.postbox.append((recipient, good_message))
 
 
-class Message(object):
+class Message:
     __slots__ = 'sender', 'message', 'topic'
 
     def __init__(self, sender: Agent, topic: str, message) -> None:
@@ -167,7 +167,7 @@ class Message(object):
         self.topic = topic
 
 
-class GoodMessage(object):
+class GoodMessage:
     __slots__ = 'good_name', 'amount', 'valuation'
 
     def __init__(self, good_name: str, amount: float, valuation: float) -> None:
@@ -176,7 +176,7 @@ class GoodMessage(object):
         self.valuation = valuation
 
 
-class Mailbox(object):
+class Mailbox:
     __slots__ = 'me', 'obligation_unopened', 'obligation_outbox', 'obligation_inbox'
 
     def __init__(self, me) -> None:

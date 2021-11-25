@@ -4,7 +4,7 @@ from .abce import NotEnoughGoods, Inventory, eps
 from .contract import Contracts
 
 
-class Account(object):
+class Account:
     __slots__ = 'name', 'account_type', 'balance', '_is_asset_or_expenses'
 
     def __init__(self, name: str, account_type: int, starting_balance: float = 0.0) -> None:
@@ -47,7 +47,7 @@ AccountType = enum(ASSET=1,
                    GOOD=6)
 
 
-class FastLedger(object):
+class FastLedger:
     __slots__ = 'cash', 'contracts', 'initial_equity'
 
     def __init__(self):

@@ -1,4 +1,4 @@
-class Obligation(object):
+class Obligation:
     __slots__ = 'amount', 'from_', 'to', 'time_to_open', 'time_to_pay', 'time_to_receive', 'simulation', 'fulfilled'
 
     def __init__(self, contract, amount: float, timeLeftToPay: int) -> None:

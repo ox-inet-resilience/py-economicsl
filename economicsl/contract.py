@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 
-class Contract(object):
+class Contract:
     __slots__ = 'assetParty', 'liabilityParty'
     """Base class for a model contract"""
     ctype = 'Contract'
@@ -30,7 +30,7 @@ class Contract(object):
         return False
 
 
-class Contracts(object):
+class Contracts:
     __slots__ = 'all_assets', 'all_liabilities'
 
     def __init__(self):
