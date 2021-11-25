@@ -1,9 +1,9 @@
-from typing import List, Union, Deque, Any
+from typing import List, Deque, Any
 from collections import deque
 import logging
 
 from .accounting import FastLedger
-from .messages import Obligation, GoodMessage
+from .messages import AbstractMessage, Obligation, GoodMessage
 from .accounting import AccountType  # NOQA
 from .abce import NotEnoughGoods  # NOQA
 
@@ -35,11 +35,11 @@ class Messenger:
         self.mailbox = Mailbox(self)
         self.postbox = None
 
-    def send(self, recipient, content):
+    def send(self, recipient, content: AbstractMessage):
         self.postbox.append((recipient, content))
         if isinstance(content, Obligation):
             self.mailbox.add_to_obligation_outbox(content)
-        # Is a cash
+        # Else, is a cash
 
     def send_obligation(self, recipient, obligation: Obligation) -> None:
         self.send(recipient, obligation)
@@ -47,7 +47,7 @@ class Messenger:
     def send_cash(self, recipient, amount) -> None:
         self.send(recipient, amount)
 
-    def receive(self, message: Union[Obligation, "GoodMessage"]) -> None:
+    def receive(self, message: AbstractMessage) -> None:
         self.mailbox.receive(message)
 
     def print_mailbox(self) -> None:
@@ -175,7 +175,7 @@ class Mailbox:
         self.obligation_outbox: List[Any] = []
         self.obligation_inbox: List[Any] = []
 
-    def receive(self, message) -> None:
+    def receive(self, message: AbstractMessage) -> None:
         if isinstance(message, Obligation):
             self.obligation_unopened.append(message)
 

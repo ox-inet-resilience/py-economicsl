@@ -4,7 +4,12 @@ if TYPE_CHECKING:
     from economicsl import Agent
 
 
-class Message:
+# Used for Mypy typing purpose
+class AbstractMessage:
+    pass
+
+
+class Message(AbstractMessage):
     __slots__ = "sender", "message", "topic"
 
     def __init__(self, sender: "Agent", topic: str, message) -> None:
@@ -13,7 +18,7 @@ class Message:
         self.topic = topic
 
 
-class GoodMessage:
+class GoodMessage(AbstractMessage):
     __slots__ = "good_name", "amount", "valuation"
 
     def __init__(self, good_name: str, amount: float, valuation: float) -> None:
@@ -22,7 +27,7 @@ class GoodMessage:
         self.valuation = valuation
 
 
-class Obligation:
+class Obligation(AbstractMessage):
     __slots__ = (
         "amount",
         "from_",
