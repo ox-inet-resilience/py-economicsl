@@ -2,7 +2,7 @@ import economicsl
 from economicsl.accounting import Ledger
 
 
-class GiveAgent(economicsl.Trade):
+class GiveAgent(economicsl.Trader):
     def __init__(self, name, teddies, money, simulation):
         super().__init__(name, simulation)
         self.main_ledger = Ledger()

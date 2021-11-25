@@ -142,7 +142,7 @@ class Action:
         return self.me.get_simulation()
 
 
-class Trade(Agent):
+class Trader(Agent):
     def __init__(self, name: str, simulation: Simulation) -> None:
         super().__init__(name, simulation)
 
