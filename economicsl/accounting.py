@@ -1,10 +1,10 @@
-from typing import Any, List, Dict, TYPE_CHECKING
+from typing import Any, List, Dict
 
 from .abce import NotEnoughGoods, Inventory, eps
 from .contract import Contracts
 
-if TYPE_CHECKING:
-    from .contract import Contract
+# Mypy
+from .contract import Contract
 
 
 class Account:
