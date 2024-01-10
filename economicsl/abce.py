@@ -25,13 +25,13 @@ class NotEnoughGoods(Exception):
 
 class Inventory(defaultdict):
     def __init__(self) -> None:
-        # cash defaults to 0.0
-        super(Inventory, self).__init__(float)
+        super().__init__(float)
 
     def get_good(self, name: str) -> float:
         return self[name]
 
-    def get_cash(self) -> float:
+    @property
+    def cash(self) -> float:
         return self.get_good("cash")
 
     def create(self, name: str, amount) -> None:
